@@ -1,0 +1,23 @@
+{
+  "name": "ark-sites",
+  "private": true,
+  "version": "1.0.0",
+  "workspaces": [
+    "apps/*",
+    "packages/*"
+  ],
+  "scripts": {
+    "dev:london": "npm run dev --workspace=apps/thelondonchurch",
+    "dev:paris": "npm run dev --workspace=apps/theparischurch",
+    "dev:berlin": "npm run dev --workspace=apps/theberlinchurch",
+    "dev:edinburgh": "npm run dev --workspace=apps/theedinburghchurch",
+    "build:london": "npm run build --workspace=apps/thelondonchurch",
+    "build:paris": "npm run build --workspace=apps/theparischurch",
+    "build:berlin": "npm run build --workspace=apps/theberlinchurch",
+    "build:edinburgh": "npm run build --workspace=apps/theedinburghchurch",
+    "build:all": "npm run build --workspace=apps/thelondonchurch && npm run build --workspace=apps/theparischurch && npm run build --workspace=apps/theberlinchurch && npm run build --workspace=apps/theedinburghchurch"
+  },
+  "engines": {
+    "node": ">=22"
+  }
+}

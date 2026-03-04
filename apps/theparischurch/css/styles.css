@@ -1,0 +1,55 @@
+@import url('https://fonts.googleapis.com/css2?family=Nunito+Sans:wght@300;400;600;700;800;900&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=League+Spartan:wght@700&family=Montserrat:wght@400;600;700&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+.text-stroke-white {
+    -webkit-text-stroke: 3px white;
+}
+
+.text-shadow {
+    text-shadow: 0px 0px 50px black;
+}
+
+.video-wrapper {position: relative; padding-bottom: 56.25%; /* 16:9 */  padding-top: 0px;}
+.video-wrapper iframe {position: absolute; top: 0; left: 0; width: 100%; height: 100%;}
+
+.player-wrapper {
+    position: relative;
+    padding-top: 56.25%; /* 720 / 1280 = 0.5625 */
+  }
+  
+  .react-player {
+    position: absolute;
+    top: 0;
+    left: 0;
+  }
+
+  :root {
+    --video-width: 100vw;
+    --video-height: 100vh;
+}
+@media (min-aspect-ratio: 16/9) {
+    :root { --video-height: 56.25vw; }
+}
+@media (max-aspect-ratio: 16/9) {
+    :root { --video-width: 177.78vh; }
+}
+
+.video-background {
+    position: relative;
+    overflow: hidden;
+    width: 100vw;
+    height: 100vh;
+}
+
+.video-background iframe {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: var(--video-width);
+    height: var(--video-height);
+    transform: translate(-50%, -50%);
+}

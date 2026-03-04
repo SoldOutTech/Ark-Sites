@@ -1,0 +1,57 @@
+{
+    "name": "@bazel-digital/ark-ui",
+    "version": "1.0.23",
+    "type": "module",
+    "main": "./dist/index.ts",
+    "files": [
+        "dist"
+    ],
+    "scripts": {
+        "build": "cpx './src/**/*' ./dist --clean",
+        "build:legacy": "tsup",
+        "build:types": "tsc --emitDeclarationOnly",
+        "postbuild:legacy": "node ./scripts/postbuild.js && npm run build:types",
+        "build-dev": "tsc --emitDeclarationOnly"
+    },
+    "license": "MIT",
+    "publishConfig": {
+        "registry": "https://npm.pkg.github.com/"
+    },
+    "devDependencies": {
+        "cpx": "^1.5.0",
+        "lucide-react": "^0.487.0",
+        "next": "^15.3.3",
+        "react": "^19.0.0",
+        "react-bricks": "^4.7.2",
+        "react-dom": "^19.0.0",
+        "tsup": "^8.5.0",
+        "typescript": "^5.8.3"
+    },
+    "peerDependencies": {
+        "@tailwindcss/forms": "^0.5.3",
+        "next": "^15.3.3",
+        "react": "^19.0.0",
+        "react-bricks": "^4.7.2",
+        "react-dom": "^19.0.0",
+        "tailwindcss": "^3.2.7"
+    },
+    "dependencies": {
+        "@fortawesome/fontawesome-svg-core": "^6.5.1",
+        "@fortawesome/free-brands-svg-icons": "^6.5.1",
+        "@fortawesome/free-solid-svg-icons": "^6.5.1",
+        "@fortawesome/react-fontawesome": "^0.2.0",
+        "auto-text-size": "^0.2.2",
+        "classnames": "^2.5.1",
+        "clsx": "^2.1.1",
+        "framer-motion": "^11.0.14",
+        "hamburger-react": "^2.5.0",
+        "lucide-react": "^0.487.0",
+        "react-icons": "^5.5.0",
+        "react-just-parallax": "^3.1.16",
+        "react-player": "^2.14.1"
+    },
+    "repository": {
+        "type": "git",
+        "url": "https://github.com/bazel-digital/ark-ui.git"
+    }
+}

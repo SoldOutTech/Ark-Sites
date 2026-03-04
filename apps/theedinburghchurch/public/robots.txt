@@ -1,0 +1,9 @@
+# *
+User-agent: *
+Allow: /
+
+# Host
+Host: https://theedinburgh.church
+
+# Sitemaps
+Sitemap: https://theedinburgh.church/sitemap.xml
