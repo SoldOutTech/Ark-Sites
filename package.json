@@ -10,12 +10,14 @@
     "dev:london": "npm run dev --workspace=apps/thelondonchurch",
     "dev:paris": "npm run dev --workspace=apps/theparischurch",
     "dev:berlin": "npm run dev --workspace=apps/theberlinchurch",
+    "dev:dublin": "npm run dev --workspace=apps/thedublinchurch",
     "dev:edinburgh": "npm run dev --workspace=apps/theedinburghchurch",
     "build:london": "npm run build --workspace=apps/thelondonchurch",
     "build:paris": "npm run build --workspace=apps/theparischurch",
     "build:berlin": "npm run build --workspace=apps/theberlinchurch",
+    "build:dublin": "npm run build --workspace=apps/thedublinchurch",
     "build:edinburgh": "npm run build --workspace=apps/theedinburghchurch",
-    "build:all": "npm run build --workspace=apps/thelondonchurch && npm run build --workspace=apps/theparischurch && npm run build --workspace=apps/theberlinchurch && npm run build --workspace=apps/theedinburghchurch"
+    "build:all": "npm run build --workspace=apps/thelondonchurch && npm run build --workspace=apps/theparischurch && npm run build --workspace=apps/theberlinchurch && npm run build --workspace=apps/thedublinchurch && npm run build --workspace=apps/theedinburghchurch"
   },
   "engines": {
     "node": ">=22"

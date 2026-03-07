@@ -24,6 +24,7 @@ apps/
   thelondonchurch/
   theparischurch/
   theberlinchurch/
+  thedublinchurch/
   theedinburghchurch/
 packages/
   ark-ui/
@@ -68,6 +69,7 @@ Run any app:
 npm run dev:london
 npm run dev:paris
 npm run dev:berlin
+npm run dev:dublin
 npm run dev:edinburgh
 ```
 
@@ -77,6 +79,7 @@ Build any app:
 npm run build:london
 npm run build:paris
 npm run build:berlin
+npm run build:dublin
 npm run build:edinburgh
 ```
 
@@ -97,6 +100,7 @@ Set each Vercel project's **Root Directory**:
 - London: `apps/thelondonchurch`
 - Paris: `apps/theparischurch`
 - Berlin: `apps/theberlinchurch`
+- Dublin: `apps/thedublinchurch`
 - Edinburgh: `apps/theedinburghchurch`
 
 Set app-specific environment variables (React Bricks credentials, etc.) in each Vercel project.

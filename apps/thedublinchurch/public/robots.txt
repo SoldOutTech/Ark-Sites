@@ -1,0 +1,9 @@
+# *
+User-agent: *
+Allow: /
+
+# Host
+Host: https://www.thelondon.church
+
+# Sitemaps
+Sitemap: https://www.thelondon.church/sitemap.xml
