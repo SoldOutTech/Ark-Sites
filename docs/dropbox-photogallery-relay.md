@@ -7,6 +7,17 @@ This project uses a server-side relay API for PhotoGallery so the browser never 
 - Input: Dropbox shared folder URL (`https://www.dropbox.com/scl/fo/...`)
 - Output: direct image URLs (`raw=1`) for rendering in PhotoGallery
 
+## Editor workflow
+
+In React Bricks, the `PhotoGallery` brick now uses a one-time load flow:
+
+1. Set `Dropbox URL` and `Max Images` in the Data panel.
+2. Click `Load Images`.
+3. The brick stores resolved URLs in `resolvedImages` props.
+4. Public page renders from saved URLs instead of re-resolving Dropbox on each visit.
+
+If you change `Dropbox URL` or increase `Max Images`, click `Load Images` again.
+
 ## Why this relay exists
 
 Dropbox shared folder links do not reliably expose image URLs to browser-side scraping. The relay solves that by:
@@ -74,7 +85,8 @@ Set the same four variables in your hosting provider project settings for the Lo
    - `/api/dropbox-gallery?dropboxUrl=<your_shared_folder_url>&maxImages=24`
 3. Confirm response contains `images` with direct `raw=1` URLs.
 4. In React Bricks editor, add the same folder URL to PhotoGallery.
-5. Confirm images render on editor and public page.
+5. Click `Load Images` in the PhotoGallery Data panel.
+6. Confirm images render on editor and public page.
 
 ## Security notes
 
