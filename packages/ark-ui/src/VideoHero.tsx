@@ -110,7 +110,7 @@ const VideoHero: types.Brick<VideoHeroProps> = ({
 
   return (
     <div
-      className={`relative text-center flex-col flex justify-center content-center items-center h-screen overflow-y-hidden`}
+      className={`relative text-center flex-col flex justify-center content-center items-center h-screen overflow-hidden`}
     >
       {/* <ScrollParallax
         zIndex={9}
@@ -191,7 +191,7 @@ const VideoHero: types.Brick<VideoHeroProps> = ({
               videoReady ? "opacity-0" : "opacity-100"
             } transition-opacity ease-in-out duration-300 absolute top-0 left-0 w-full h-full bg-black z-10`}
           />
-          <div className="absolute overflow-hidden z-10 w-screen h-screen bg-black opacity-40"></div>
+          <div className="absolute inset-0 overflow-hidden z-10 w-full h-full bg-black opacity-40"></div>
           <NoSSRReactPlayer
             controls={false}
             loop

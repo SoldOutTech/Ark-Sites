@@ -49,7 +49,7 @@ const NavigationBar: types.Brick<HeaderProps> = ({
 
   const MobileNavigationLinks = () => {
     return (
-      <div className="md:hidden flex w-screen">
+      <div className="md:hidden flex w-full">
         <div className="z-10 ml-auto">
           {mounted && (
             <Hamburger
@@ -62,13 +62,13 @@ const NavigationBar: types.Brick<HeaderProps> = ({
         </div>
 
         {/* Wrap all the mobile navigation items in a div to ensure that we can hide any overflow caused by the scaling */}
-        <div className="w-screen h-screen overflow-hidden absolute left-0 top-0 scroll">
+        <div className="fixed inset-0 w-full h-full overflow-hidden scroll">
           <div
             className={`${
               mobileMenuOpen
                 ? "scale-100 opacity-100"
                 : "scale-[1.1] opacity-0 blur-sm pointer-events-none"
-            } z-[8] bg-backgroundBlack ease-in-out duration-700 h-screen w-screen absolute left-0 top-0 flex flex-col justify-center content-center items-center space-y-10`}
+            } z-[8] bg-backgroundBlack ease-in-out duration-700 h-full w-full absolute inset-0 flex flex-col justify-center content-center items-center space-y-10`}
           >
             {/* Vertical list of links which are derived from the <Repeater /> */}
             <Repeater
@@ -104,7 +104,7 @@ const NavigationBar: types.Brick<HeaderProps> = ({
     <Section
       backgroundColor={backgroundColor}
       borderBottom={"none"}
-      className="absolute z-[1000] w-screen top-0 left-0"
+      className="fixed inset-x-0 top-0 z-[1000] w-full"
     >
       <div className="w-full h-40 bg-gradient-to-b from-black/60 to-transparent ">
         <nav className="py-5 px-5 lg:px-20 flex justify-start items-cente">

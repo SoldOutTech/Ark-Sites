@@ -5,6 +5,14 @@
 @tailwind components;
 @tailwind utilities;
 
+html,
+body,
+#__next {
+    background-color: #000;
+    width: 100%;
+    max-width: 100%;
+}
+
 .text-stroke-white {
     -webkit-text-stroke: 3px white;
 }
@@ -41,8 +49,8 @@
 .video-background {
     position: relative;
     overflow: hidden;
-    width: 100vw;
-    height: 100vh;
+    width: 100%;
+    height: 100%;
 }
 
 .video-background iframe {
