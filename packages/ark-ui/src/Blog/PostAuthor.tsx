@@ -1,10 +1,10 @@
 "use client"
 
 import React from 'react'
-import { types, usePageValues, Text, RichText, Repeater, Image } from 'react-bricks/frontend'
+import { types, usePageValues, Image } from 'react-bricks/frontend'
 import { AUTHORS } from './authors'
-import { ArKUIColours, ArkUIColourValue } from '@bazel-digital/ark-ui/src/colors'
-import IconLink from '@bazel-digital/ark-ui/src/Components/IconLink'
+import { ArKUIColours, ArkUIColourValue } from '../colors'
+import IconLink from '../Components/IconLink'
 
 /**
  * PostAuthor - A wrapper that uses the ProfileGridItem layout pattern

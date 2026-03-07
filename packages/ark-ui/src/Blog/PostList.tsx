@@ -3,8 +3,8 @@ import { types } from 'react-bricks/frontend'
 import Link from 'next/link'
 import dayjs from 'dayjs'
 import { POST_CATEGORIES, PostCategory } from './constants'
-import { usePosts } from '../../components/PostsContext'
-import { ArKUIColours, ArkUIColourValue } from '@bazel-digital/ark-ui/src/colors'
+import { usePosts } from './PostsContext'
+import { ArKUIColours, ArkUIColourValue } from '../colors'
 
 interface PostListProps {
     filterCategory?: PostCategory | ''
@@ -143,8 +143,6 @@ const PostList: types.Brick<PostListProps> = ({
             const dateB = b.customValues?.date ? new Date(b.customValues.date) : new Date(0)
             return dateB.getTime() - dateA.getTime()
         })
-
-    console.log(posts)
 
     // Use the className directly from the selected option
     const borderClass = borderColour.className

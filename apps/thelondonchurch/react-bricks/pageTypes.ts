@@ -1,6 +1,5 @@
 import { types } from 'react-bricks/frontend'
-import { POST_CATEGORIES } from './bricks/constants'
-import { AUTHORS } from './bricks/authors'
+import { AUTHORS, POST_CATEGORIES } from '@bazel-digital/ark-ui'
 
 const pageTypes: types.IPageType[] = [
   {

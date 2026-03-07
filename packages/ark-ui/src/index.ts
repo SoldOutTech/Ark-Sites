@@ -27,6 +27,16 @@ import IconHeroProfile from "./Profile/IconHeroProfile";
 import PhotoGallery from "./PhotoGallery";
 import { ArKUIColours } from "./colors";
 import type { ArkUIColourValue } from "./colors";
+import {
+  ArticleBody,
+  AUTHORS,
+  POST_CATEGORIES,
+  PostAuthor,
+  PostList,
+  PostMetadata,
+  PostsProvider,
+  usePosts,
+} from "./Blog";
 
 // Theme structure
 const allBricks: types.Theme = {
@@ -69,10 +79,26 @@ const allBricks: types.Theme = {
         FooterSocialLink,
       ],
     },
+    {
+      categoryName: "Blog",
+      bricks: [PostList, ArticleBody, PostAuthor, PostMetadata],
+    },
   ],
 };
 
 // Public exports for app-level usage without importing internal dist paths.
-export { IconLink, ArKUIColours };
+export {
+  ArticleBody,
+  AUTHORS,
+  ArKUIColours,
+  IconLink,
+  POST_CATEGORIES,
+  PostAuthor,
+  PostList,
+  PostMetadata,
+  PostsProvider,
+  usePosts,
+};
 export type { ArkUIColourValue };
+export type { Author, PostCategory, PostsContextType } from "./Blog";
 export default allBricks;

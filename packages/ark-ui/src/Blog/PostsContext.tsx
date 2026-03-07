@@ -1,7 +1,7 @@
 import React, { createContext, useContext } from 'react'
 import { types } from 'react-bricks/frontend'
 
-interface PostsContextType {
+export interface PostsContextType {
     posts: types.Page[]
 }
 

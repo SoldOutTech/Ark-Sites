@@ -15,7 +15,7 @@ import ErrorNoFooter from '../../components/errorNoFooter'
 import ErrorNoHeader from '../../components/errorNoHeader'
 import ErrorNoKeys from '../../components/errorNoKeys'
 import Layout from '../../components/layout'
-import { PostsProvider } from '../../components/PostsContext'
+import { PostsProvider } from '@bazel-digital/ark-ui'
 import config from '../../react-bricks/config'
 
 interface PageProps {
