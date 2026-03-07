@@ -1,6 +1,6 @@
 import React from 'react'
 import { types, RichText } from 'react-bricks/frontend'
-import { ArKUIColours, ArkUIColourValue } from '@bazel-digital/ark-ui/dist/colors'
+import { ArKUIColours, ArkUIColourValue } from '@bazel-digital/ark-ui/src/colors'
 
 interface ArticleBodyProps {
     textAlign: 'left' | 'center' | 'right' | 'justify'

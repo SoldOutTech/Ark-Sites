@@ -1,7 +1,7 @@
 import React from 'react'
 import { types, usePageValues } from 'react-bricks/frontend'
 import dayjs from 'dayjs'
-import { ArKUIColours, ArkUIColourValue } from '@bazel-digital/ark-ui/dist/colors'
+import { ArKUIColours, ArkUIColourValue } from '@bazel-digital/ark-ui/src/colors'
 
 interface PostMetadataProps {
     backgroundColour: ArkUIColourValue

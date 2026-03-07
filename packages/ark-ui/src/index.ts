@@ -25,6 +25,8 @@ import CollapsibleHeroBlock from "./Collapsible/CollapsibleHeroBlock";
 import NavigationBarItem from "./Navigation/NavigationBarItem";
 import IconHeroProfile from "./Profile/IconHeroProfile";
 import PhotoGallery from "./PhotoGallery";
+import { ArKUIColours } from "./colors";
+import type { ArkUIColourValue } from "./colors";
 
 // Theme structure
 const allBricks: types.Theme = {
@@ -70,4 +72,7 @@ const allBricks: types.Theme = {
   ],
 };
 
+// Public exports for app-level usage without importing internal dist paths.
+export { IconLink, ArKUIColours };
+export type { ArkUIColourValue };
 export default allBricks;

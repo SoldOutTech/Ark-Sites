@@ -3,8 +3,8 @@
 import React from 'react'
 import { types, usePageValues, Text, RichText, Repeater, Image } from 'react-bricks/frontend'
 import { AUTHORS } from './authors'
-import { ArKUIColours, ArkUIColourValue } from '@bazel-digital/ark-ui/dist/colors'
-import IconLink from '@bazel-digital/ark-ui/dist/Components/IconLink'
+import { ArKUIColours, ArkUIColourValue } from '@bazel-digital/ark-ui/src/colors'
+import IconLink from '@bazel-digital/ark-ui/src/Components/IconLink'
 
 /**
  * PostAuthor - A wrapper that uses the ProfileGridItem layout pattern

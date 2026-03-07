@@ -4,7 +4,7 @@ import Link from 'next/link'
 import dayjs from 'dayjs'
 import { POST_CATEGORIES, PostCategory } from './constants'
 import { usePosts } from '../../components/PostsContext'
-import { ArKUIColours, ArkUIColourValue } from '@bazel-digital/ark-ui/dist/colors'
+import { ArKUIColours, ArkUIColourValue } from '@bazel-digital/ark-ui/src/colors'
 
 interface PostListProps {
     filterCategory?: PostCategory | ''
