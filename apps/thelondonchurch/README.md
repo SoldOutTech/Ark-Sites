@@ -36,6 +36,23 @@ NEXT_PUBLIC_REACT_BRICKS_APP_ID=...
 REACT_BRICKS_API_KEY=...
 ```
 
+### PhotoGallery Dropbox relay
+
+PhotoGallery Dropbox folder links use a server-side relay endpoint in this app.
+
+Required Dropbox env vars for the relay:
+
+```bash
+DROPBOX_ACCESS_TOKEN=...
+DROPBOX_REFRESH_TOKEN=...
+DROPBOX_APP_KEY=...
+DROPBOX_APP_SECRET=...
+```
+
+Full setup guide:
+
+- [Dropbox PhotoGallery Relay docs](/Users/aaronbaw/Code/Ark Sites/docs/dropbox-photogallery-relay.md)
+
 ## Build
 
 From repo root:

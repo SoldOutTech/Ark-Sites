@@ -27,6 +27,7 @@
     "auto-text-size": "^0.2.2",
     "create-reactbricks-app": "^1.2.9",
     "dayjs": "^1.11.7",
+    "dropbox": "^10.34.0",
     "email-validator": "^2.0.4",
     "framer-motion": "^11.0.14",
     "hamburger-react": "^2.5.0",

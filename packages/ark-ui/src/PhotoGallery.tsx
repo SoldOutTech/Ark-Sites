@@ -11,6 +11,12 @@ interface PhotoGalleryProps {
   showCaptions: boolean;
 }
 
+interface RelayImage {
+  src: string;
+  caption?: string;
+  name?: string;
+}
+
 const IMAGE_EXTENSIONS = ["jpg", "jpeg", "png", "webp", "gif", "avif"];
 
 const getGridClass = (columns: PhotoGalleryProps["columns"]) => {
@@ -37,14 +43,10 @@ const getGapClass = (gap: PhotoGalleryProps["gap"]) => {
   }
 };
 
-const decodeEscapedEntities = (value: string) =>
-  value.replace(/\\u0026/g, "&").replace(/&amp;/g, "&");
-
 const ensureDropboxRawUrl = (url: string) => {
   try {
     const parsed = new URL(url.trim());
 
-    // Convert shared web links to direct-content host where possible.
     if (parsed.hostname === "www.dropbox.com") {
       parsed.hostname = "dl.dropboxusercontent.com";
     }
@@ -70,29 +72,27 @@ const toCaption = (url: string) => {
   }
 };
 
-const extractImageUrls = (input: string) => {
-  const decoded = decodeEscapedEntities(input);
-  const imageExtPattern = IMAGE_EXTENSIONS.join("|");
-  const imageRegex = new RegExp(
-    `https?:\\\\/\\\\/[^"'\\s)]+(?:${imageExtPattern})(?:\\?[^"'\\s)]*)?`,
-    "gi"
-  );
-  const standardRegex = new RegExp(
-    `https?:\\/\\/[^"'\\s)]+(?:${imageExtPattern})(?:\\?[^"'\\s)]*)?`,
-    "gi"
+const isDirectImageUrl = (value: string) =>
+  IMAGE_EXTENSIONS.some((ext) =>
+    new RegExp(`\\.${ext}(\\?|$)`, "i").test(value)
   );
 
-  const matches = [
-    ...(decoded.match(imageRegex) || []).map((v) => v.replace(/\\\//g, "/")),
-    ...(decoded.match(standardRegex) || []),
-  ];
+const isDropboxFolderUrl = (value: string) => {
+  try {
+    const parsed = new URL(value.trim());
+    const hostname = parsed.hostname.replace(/^www\./, "").toLowerCase();
+    return hostname === "dropbox.com" && parsed.pathname.includes("/scl/fo/");
+  } catch {
+    return false;
+  }
+};
 
-  const normalized = matches
-    .map((url) => url.replace(/^http:\/\//i, "https://"))
-    .map((url) => (url.includes("dropbox.com") ? ensureDropboxRawUrl(url) : url))
-    .filter((url) => IMAGE_EXTENSIONS.some((ext) => new RegExp(`\\.${ext}(\\?|$)`, "i").test(url)));
+const normalizeMaxImages = (value: number) => {
+  if (!Number.isFinite(value)) {
+    return 24;
+  }
 
-  return Array.from(new Set(normalized));
+  return Math.max(1, Math.floor(value));
 };
 
 const PhotoGallery: types.Brick<PhotoGalleryProps> = ({
@@ -111,7 +111,10 @@ const PhotoGallery: types.Brick<PhotoGalleryProps> = ({
     let isMounted = true;
 
     const load = async () => {
-      if (!dropboxUrl?.trim()) {
+      const trimmedUrl = dropboxUrl?.trim();
+      const resolvedMax = normalizeMaxImages(maxImages);
+
+      if (!trimmedUrl) {
         setImages([]);
         setError("");
         return;
@@ -121,37 +124,61 @@ const PhotoGallery: types.Brick<PhotoGalleryProps> = ({
       setError("");
 
       try {
-        const directImage =
-          IMAGE_EXTENSIONS.some((ext) =>
-            new RegExp(`\\.${ext}(\\?|$)`, "i").test(dropboxUrl)
-          ) ? [ensureDropboxRawUrl(dropboxUrl)] : [];
-
-        const fetchUrl = ensureDropboxRawUrl(dropboxUrl);
-        const response = await fetch(fetchUrl);
-
-        if (!response.ok) {
-          throw new Error(`Could not fetch Dropbox URL (${response.status})`);
+        if (isDirectImageUrl(trimmedUrl)) {
+          const direct = ensureDropboxRawUrl(trimmedUrl);
+          if (isMounted) {
+            setImages([direct]);
+          }
+          return;
         }
 
-        const text = await response.text();
-        const parsedUrls = extractImageUrls(text);
-        const merged = Array.from(new Set([...directImage, ...parsedUrls])).slice(
-          0,
-          Math.max(1, maxImages || 1)
-        );
+        if (!isDropboxFolderUrl(trimmedUrl)) {
+          throw new Error(
+            "Unsupported Dropbox URL. Use a shared folder link or a direct image URL."
+          );
+        }
+
+        const url = new URL("/api/dropbox-gallery", window.location.origin);
+        url.searchParams.set("dropboxUrl", trimmedUrl);
+        url.searchParams.set("maxImages", String(resolvedMax));
+
+        const response = await fetch(url.toString(), {
+          method: "GET",
+          headers: {
+            Accept: "application/json",
+          },
+        });
+
+        const data = await response.json().catch(() => ({}));
+
+        if (!response.ok) {
+          throw new Error(
+            data?.error ||
+              "PhotoGallery relay API request failed. Check API route and Dropbox credentials."
+          );
+        }
+
+        const relayImages = Array.isArray(data?.images)
+          ? (data.images as RelayImage[])
+              .map((image) => image?.src || "")
+              .filter(Boolean)
+          : [];
+
+        const merged = Array.from(new Set(relayImages));
 
         if (isMounted) {
           setImages(merged);
           if (!merged.length) {
             setError(
-              "No images were found in this link. Ensure the folder is publicly viewable."
+              "No images were returned by the Dropbox relay. Ensure the folder is public and contains image files."
             );
           }
         }
-      } catch {
+      } catch (err: any) {
         if (isMounted) {
           setError(
-            "Unable to load Dropbox images from this URL. Check that it is publicly viewable."
+            err?.message ||
+              "Unable to load Dropbox images from relay API. Check Dropbox credentials and folder visibility."
           );
           setImages([]);
         }
