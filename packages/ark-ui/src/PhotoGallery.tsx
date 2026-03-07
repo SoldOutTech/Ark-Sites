@@ -1,7 +1,10 @@
 "use client";
 
-import React, { useEffect, useMemo, useRef, useState } from "react";
+import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { types, useAdminContext, useVisualEdit } from "react-bricks/frontend";
+import { ArKUIColours, ArkUIColourValue } from "./colors";
+
+type LoadState = "idle" | "loading" | "success" | "warning" | "error";
 
 interface PhotoGalleryProps {
   dropboxUrl: string;
@@ -9,11 +12,18 @@ interface PhotoGalleryProps {
   columns: "2" | "3" | "4";
   gap: "2" | "4" | "6";
   showCaptions: boolean;
+  backgroundColour?: ArkUIColourValue;
+  padding?: string;
+  backgroundColor?: { color: string; className: string };
+  paddingTop?: string;
+  paddingBottom?: string;
   resolvedImages?: string[];
   resolvedFromUrl?: string;
   resolvedMaxImages?: number;
   resolvedAt?: string;
   loadImagesTrigger?: number;
+  loadState?: LoadState;
+  statusMessage?: string;
 }
 
 interface RelayImage {
@@ -102,6 +112,48 @@ const normalizeMaxImages = (value: number) => {
 
 const dedupeImageUrls = (urls: string[]) => Array.from(new Set(urls.filter(Boolean)));
 
+const getLegacyPaddingTopClass = (padding: string) => {
+  switch (padding) {
+    case "20":
+      return "pt-12 lg:pt-20";
+    case "16":
+      return "pt-12 lg:pt-16";
+    case "12":
+      return "pt-12";
+    case "10":
+      return "pt-10";
+    case "8":
+      return "pt-8";
+    case "6":
+      return "pt-6";
+    case "0":
+      return "pt-0";
+    default:
+      return "pt-12 lg:pt-16";
+  }
+};
+
+const getLegacyPaddingBottomClass = (padding: string) => {
+  switch (padding) {
+    case "20":
+      return "pb-12 lg:pb-20";
+    case "16":
+      return "pb-12 lg:pb-16";
+    case "12":
+      return "pb-12";
+    case "10":
+      return "pb-10";
+    case "8":
+      return "pb-8";
+    case "6":
+      return "pb-6";
+    case "0":
+      return "pb-0";
+    default:
+      return "pb-12 lg:pb-16";
+  }
+};
+
 const fetchDropboxFolderImages = async (dropboxUrl: string, maxImages: number) => {
   const url = new URL("/api/dropbox-gallery", window.location.origin);
   url.searchParams.set("dropboxUrl", dropboxUrl);
@@ -140,27 +192,81 @@ const LoadImagesKnob: React.FC<types.ICustomKnobProps> = ({ onChange }) => (
   </button>
 );
 
+const StatusKnob: React.FC<types.ICustomKnobProps> = ({ value }) => {
+  const status = typeof value === "string" ? value.toLowerCase() : "idle";
+  const toneClass =
+    status === "error"
+      ? "border-red-300 bg-red-50 text-red-700"
+      : status === "warning"
+      ? "border-amber-300 bg-amber-50 text-amber-700"
+      : status === "success"
+      ? "border-emerald-300 bg-emerald-50 text-emerald-700"
+      : status === "loading"
+      ? "border-blue-300 bg-blue-50 text-blue-700"
+      : "border-gray-300 bg-gray-50 text-gray-700";
+
+  return (
+    <div className={`w-full rounded border px-3 py-2 text-sm font-medium ${toneClass}`}>
+      {typeof value === "string" && value.trim() ? value : "idle"}
+    </div>
+  );
+};
+
+const StatusMessageKnob: React.FC<types.ICustomKnobProps> = ({ value }) => (
+  <p className="text-sm text-gray-700">
+    {typeof value === "string" && value.trim() ? value : "No status yet."}
+  </p>
+);
+
+const LoadedAtKnob: React.FC<types.ICustomKnobProps> = ({ value }) => {
+  if (typeof value !== "string" || !value.trim()) {
+    return <p className="text-sm text-gray-700">Not loaded yet.</p>;
+  }
+
+  const parsed = new Date(value);
+  const display = Number.isNaN(parsed.getTime()) ? value : parsed.toLocaleString();
+  return <p className="text-sm text-gray-700">{display}</p>;
+};
+
 const PhotoGallery: types.Brick<PhotoGalleryProps> = ({
   dropboxUrl,
   maxImages = 24,
   columns = "3",
   gap = "4",
   showCaptions = false,
+  backgroundColour = ArKUIColours.WHITE.value,
+  padding = "lg:p-20 p-4",
+  backgroundColor,
+  paddingTop,
+  paddingBottom,
   resolvedImages = [],
   resolvedFromUrl = "",
   resolvedMaxImages = 0,
   resolvedAt = "",
   loadImagesTrigger = 0,
+  loadState = "idle",
+  statusMessage = "",
 }) => {
   const { isAdmin } = useAdminContext();
   const [, setResolvedImages] = useVisualEdit("resolvedImages");
   const [, setResolvedFromUrl] = useVisualEdit("resolvedFromUrl");
   const [, setResolvedMaxImages] = useVisualEdit("resolvedMaxImages");
   const [, setResolvedAt] = useVisualEdit("resolvedAt");
+  const [, setLoadState] = useVisualEdit("loadState");
+  const [, setStatusMessage] = useVisualEdit("statusMessage");
   const lastProcessedTriggerRef = useRef<number>(0);
   const [images, setImages] = useState<string[]>([]);
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<string>("");
+  const applyStatus = useCallback(
+    (nextState: LoadState, nextMessage: string) => {
+      if (loadState !== nextState) {
+        setLoadState(nextState);
+      }
+      if (statusMessage !== nextMessage) {
+        setStatusMessage(nextMessage);
+      }
+    },
+    [loadState, setLoadState, setStatusMessage, statusMessage]
+  );
 
   useEffect(() => {
     const trimmedUrl = dropboxUrl?.trim();
@@ -168,22 +274,19 @@ const PhotoGallery: types.Brick<PhotoGalleryProps> = ({
 
     if (!trimmedUrl) {
       setImages([]);
-      setError("");
-      setLoading(false);
+      applyStatus("idle", "Add a public Dropbox folder URL.");
       return;
     }
 
     if (isDirectImageUrl(trimmedUrl)) {
       setImages([ensureDropboxRawUrl(trimmedUrl)]);
-      setError("");
-      setLoading(false);
+      applyStatus("success", "Using direct image URL.");
       return;
     }
 
     if (!isDropboxFolderUrl(trimmedUrl)) {
       setImages([]);
-      setError("Unsupported Dropbox URL. Use a shared folder link or a direct image URL.");
-      setLoading(false);
+      applyStatus("error", "Unsupported Dropbox URL. Use a shared folder link.");
       return;
     }
 
@@ -194,25 +297,33 @@ const PhotoGallery: types.Brick<PhotoGalleryProps> = ({
       setImages(persisted.slice(0, resolvedMax));
 
       if (isAdmin && resolvedMaxImages > 0 && resolvedMax > resolvedMaxImages) {
-        setError(
+        applyStatus(
+          "warning",
           "Current maxImages is higher than the saved result. Click 'Load Images' to refresh."
         );
       } else {
-        setError("");
+        applyStatus("success", `Loaded ${persisted.slice(0, resolvedMax).length} images.`);
       }
 
-      setLoading(false);
       return;
     }
 
     setImages([]);
-    setLoading(false);
-    setError(
+    applyStatus(
+      isAdmin ? "warning" : "idle",
       isAdmin
         ? "No saved images for this Dropbox folder yet. Click 'Load Images' in the Data panel."
         : "Gallery images are not loaded yet."
     );
-  }, [dropboxUrl, isAdmin, maxImages, resolvedFromUrl, resolvedImages, resolvedMaxImages]);
+  }, [
+    applyStatus,
+    dropboxUrl,
+    isAdmin,
+    maxImages,
+    resolvedFromUrl,
+    resolvedImages,
+    resolvedMaxImages,
+  ]);
 
   useEffect(() => {
     let isMounted = true;
@@ -225,8 +336,7 @@ const PhotoGallery: types.Brick<PhotoGalleryProps> = ({
     }
     lastProcessedTriggerRef.current = loadImagesTrigger;
 
-    setLoading(true);
-    setError("");
+    applyStatus("loading", "Loading gallery...");
 
     const trimmedUrl = dropboxUrl?.trim();
     const resolvedMax = normalizeMaxImages(maxImages);
@@ -264,9 +374,12 @@ const PhotoGallery: types.Brick<PhotoGalleryProps> = ({
         setImages(resolved);
 
         if (!resolved.length) {
-          setError(
+          applyStatus(
+            "warning",
             "No images were returned by the Dropbox relay. Ensure the folder is public and contains image files."
           );
+        } else {
+          applyStatus("success", `Loaded ${resolved.length} images.`);
         }
       })
       .catch((err: any) => {
@@ -274,22 +387,19 @@ const PhotoGallery: types.Brick<PhotoGalleryProps> = ({
           return;
         }
 
-        setError(
+        setImages([]);
+        applyStatus(
+          "error",
           err?.message ||
             "Unable to load Dropbox images from relay API. Check Dropbox credentials and folder visibility."
         );
-        setImages([]);
-      })
-      .finally(() => {
-        if (isMounted) {
-          setLoading(false);
-        }
       });
 
     return () => {
       isMounted = false;
     };
   }, [
+    applyStatus,
     dropboxUrl,
     isAdmin,
     loadImagesTrigger,
@@ -304,32 +414,22 @@ const PhotoGallery: types.Brick<PhotoGalleryProps> = ({
     () => `${getGridClass(columns)} ${getGapClass(gap)} grid`,
     [columns, gap]
   );
+  const legacyPaddingClasses = `${getLegacyPaddingTopClass(
+    paddingTop || "16"
+  )} ${getLegacyPaddingBottomClass(paddingBottom || "16")} px-6 lg:px-10`;
+  const resolvedPadding = padding || legacyPaddingClasses;
+  const resolvedBackgroundColour = backgroundColour?.color
+    ? backgroundColour
+    : backgroundColor?.color
+    ? { color: backgroundColor.color, className: backgroundColor.className || "" }
+    : ArKUIColours.WHITE.value;
 
   return (
-    <section className="w-full px-6 lg:px-10 py-10">
-      {isAdmin && !dropboxUrl ? (
-        <p className="text-sm opacity-75 mb-4">
-          Add a public Dropbox folder URL in the sidebar to load photos.
-        </p>
-      ) : null}
-
-      {loading ? (
-        <p className="text-sm opacity-75">Loading gallery...</p>
-      ) : null}
-
-      {!loading && error ? (
-        <p className={`text-sm ${images.length ? "text-amber-500" : "text-red-400"}`}>
-          {error}
-        </p>
-      ) : null}
-
-      {isAdmin && resolvedAt ? (
-        <p className="text-xs opacity-60 mt-2 mb-3">
-          Loaded at {new Date(resolvedAt).toLocaleString()}
-        </p>
-      ) : null}
-
-      {!loading && images.length ? (
+    <section
+      style={{ backgroundColor: resolvedBackgroundColour.color }}
+      className={resolvedPadding}
+    >
+      {images.length ? (
         <div className={gridClass}>
           {images.map((url) => (
             <figure
@@ -365,11 +465,18 @@ PhotoGallery.schema = {
     columns: "3",
     gap: "4",
     showCaptions: false,
+    backgroundColour: ArKUIColours.WHITE.value,
+    padding: "lg:p-20 p-4",
+    backgroundColor: undefined,
+    paddingTop: undefined,
+    paddingBottom: undefined,
     resolvedImages: [],
     resolvedFromUrl: "",
     resolvedMaxImages: 0,
     resolvedAt: "",
     loadImagesTrigger: 0,
+    loadState: "idle",
+    statusMessage: "",
   }),
   sideEditProps: [
     {
@@ -393,10 +500,28 @@ PhotoGallery.schema = {
           helperText:
             "Fetch image URLs from Dropbox once and store them in this block.",
         },
+        {
+          name: "loadState",
+          label: "Status",
+          type: types.SideEditPropType.Custom,
+          component: StatusKnob,
+        },
+        {
+          name: "statusMessage",
+          label: "Message",
+          type: types.SideEditPropType.Custom,
+          component: StatusMessageKnob,
+        },
+        {
+          name: "resolvedAt",
+          label: "Loaded At",
+          type: types.SideEditPropType.Custom,
+          component: LoadedAtKnob,
+        },
       ],
     },
     {
-      groupName: "Layout",
+      groupName: "Grid",
       props: [
         {
           name: "columns",
@@ -428,6 +553,44 @@ PhotoGallery.schema = {
           name: "showCaptions",
           label: "Show Captions",
           type: types.SideEditPropType.Boolean,
+        },
+      ],
+    },
+    {
+      groupName: "Background",
+      props: [
+        {
+          name: "backgroundColour",
+          label: "Background Colour",
+          type: types.SideEditPropType.Select,
+          selectOptions: {
+            display: types.OptionsDisplay.Color,
+            options: [
+              ArKUIColours.BLACK,
+              ArKUIColours.WHITE,
+              ArKUIColours.TRANSPARENT,
+            ],
+          },
+        },
+      ],
+    },
+    {
+      groupName: "Layout",
+      props: [
+        {
+          name: "padding",
+          label: "Padding",
+          type: types.SideEditPropType.Select,
+          selectOptions: {
+            display: types.OptionsDisplay.Select,
+            options: [
+              { value: "lg:p-60 p-8", label: "Big Padding" },
+              { value: "lg:p-40 p-6", label: "Medium Padding" },
+              { value: "lg:p-20 p-4", label: "Regular Padding" },
+              { value: "lg:p-10 p-2", label: "Small Padding" },
+              { value: "lg:p-0 p-0", label: "No Padding" },
+            ],
+          },
         },
       ],
     },
