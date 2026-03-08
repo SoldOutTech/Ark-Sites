@@ -22,8 +22,6 @@ interface PhotoGalleryProps {
   backgroundColour?: ArkUIColourValue;
   padding?: string;
   backgroundColor?: { color: string; className: string };
-  paddingTop?: string;
-  paddingBottom?: string;
   resolvedImages?: string[];
   resolvedThumbnails?: Record<string, string>;
   resolvedFromUrl?: string;
@@ -143,48 +141,6 @@ const dedupeImages = (images: GalleryImage[]) => {
   return Array.from(map.values());
 };
 
-const getLegacyPaddingTopClass = (padding: string) => {
-  switch (padding) {
-    case "20":
-      return "pt-12 lg:pt-20";
-    case "16":
-      return "pt-12 lg:pt-16";
-    case "12":
-      return "pt-12";
-    case "10":
-      return "pt-10";
-    case "8":
-      return "pt-8";
-    case "6":
-      return "pt-6";
-    case "0":
-      return "pt-0";
-    default:
-      return "pt-12 lg:pt-16";
-  }
-};
-
-const getLegacyPaddingBottomClass = (padding: string) => {
-  switch (padding) {
-    case "20":
-      return "pb-12 lg:pb-20";
-    case "16":
-      return "pb-12 lg:pb-16";
-    case "12":
-      return "pb-12";
-    case "10":
-      return "pb-10";
-    case "8":
-      return "pb-8";
-    case "6":
-      return "pb-6";
-    case "0":
-      return "pb-0";
-    default:
-      return "pb-12 lg:pb-16";
-  }
-};
-
 const fetchDropboxFolderImages = async (
   dropboxUrl: string,
   maxImages: number,
@@ -287,8 +243,6 @@ const PhotoGallery: types.Brick<PhotoGalleryProps> = ({
   backgroundColour = ArKUIColours.WHITE.value,
   padding = "lg:p-20 p-4",
   backgroundColor,
-  paddingTop,
-  paddingBottom,
   resolvedImages = [],
   resolvedThumbnails = {},
   resolvedFromUrl = "",
@@ -553,11 +507,7 @@ const PhotoGallery: types.Brick<PhotoGalleryProps> = ({
     window.setTimeout(() => setActiveLightboxIndex(null), 180);
   }, []);
 
-  const legacyPaddingClasses = `${getLegacyPaddingTopClass(
-    paddingTop || "16",
-  )} ${getLegacyPaddingBottomClass(paddingBottom || "16")} px-6 lg:px-10`;
-
-  const resolvedPadding = padding || legacyPaddingClasses;
+  const resolvedPadding = padding || "lg:p-20 p-4";
   const resolvedBackgroundColour = backgroundColour?.color
     ? backgroundColour
     : backgroundColor?.color
@@ -660,8 +610,6 @@ PhotoGallery.schema = {
     backgroundColour: ArKUIColours.WHITE.value,
     padding: "lg:p-20 p-4",
     backgroundColor: undefined,
-    paddingTop: undefined,
-    paddingBottom: undefined,
     resolvedImages: [],
     resolvedThumbnails: {},
     resolvedFromUrl: "",
