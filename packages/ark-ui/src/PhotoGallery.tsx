@@ -1,6 +1,12 @@
 "use client";
 
-import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import React, {
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
 import { types, useAdminContext, useVisualEdit } from "react-bricks/frontend";
 import { ArKUIColours, ArkUIColourValue } from "./colors";
 
@@ -93,7 +99,7 @@ const toCaption = (url: string) => {
 
 const isDirectImageUrl = (value: string) =>
   IMAGE_EXTENSIONS.some((ext) =>
-    new RegExp(`\\.${ext}(\\?|$)`, "i").test(value)
+    new RegExp(`\\.${ext}(\\?|$)`, "i").test(value),
   );
 
 const isDropboxFolderUrl = (value: string) => {
@@ -182,7 +188,7 @@ const getLegacyPaddingBottomClass = (padding: string) => {
 const fetchDropboxFolderImages = async (
   dropboxUrl: string,
   maxImages: number,
-  thumbSize: string
+  thumbSize: string,
 ) => {
   const url = new URL("/api/dropbox-gallery", window.location.origin);
   url.searchParams.set("dropboxUrl", dropboxUrl);
@@ -201,11 +207,13 @@ const fetchDropboxFolderImages = async (
   if (!response.ok) {
     throw new Error(
       data?.error ||
-        "PhotoGallery relay API request failed. Check API route and Dropbox credentials."
+        "PhotoGallery relay API request failed. Check API route and Dropbox credentials.",
     );
   }
 
-  const relayImages = Array.isArray(data?.images) ? (data.images as GalleryImage[]) : [];
+  const relayImages = Array.isArray(data?.images)
+    ? (data.images as GalleryImage[])
+    : [];
 
   return dedupeImages(
     relayImages
@@ -215,7 +223,7 @@ const fetchDropboxFolderImages = async (
         caption: image?.caption || "",
         name: image?.name || "",
       }))
-      .filter((image) => Boolean(image.src))
+      .filter((image) => Boolean(image.src)),
   );
 };
 
@@ -235,15 +243,17 @@ const StatusKnob: React.FC<types.ICustomKnobProps> = ({ value }) => {
     status === "error"
       ? "border-red-300 bg-red-50 text-red-700"
       : status === "warning"
-      ? "border-amber-300 bg-amber-50 text-amber-700"
-      : status === "success"
-      ? "border-emerald-300 bg-emerald-50 text-emerald-700"
-      : status === "loading"
-      ? "border-blue-300 bg-blue-50 text-blue-700"
-      : "border-gray-300 bg-gray-50 text-gray-700";
+        ? "border-amber-300 bg-amber-50 text-amber-700"
+        : status === "success"
+          ? "border-emerald-300 bg-emerald-50 text-emerald-700"
+          : status === "loading"
+            ? "border-blue-300 bg-blue-50 text-blue-700"
+            : "border-gray-300 bg-gray-50 text-gray-700";
 
   return (
-    <div className={`w-full rounded border px-3 py-2 text-sm font-medium ${toneClass}`}>
+    <div
+      className={`w-full rounded border px-3 py-2 text-sm font-medium ${toneClass}`}
+    >
       {typeof value === "string" && value.trim() ? value : "idle"}
     </div>
   );
@@ -261,7 +271,9 @@ const LoadedAtKnob: React.FC<types.ICustomKnobProps> = ({ value }) => {
   }
 
   const parsed = new Date(value);
-  const display = Number.isNaN(parsed.getTime()) ? value : parsed.toLocaleString();
+  const display = Number.isNaN(parsed.getTime())
+    ? value
+    : parsed.toLocaleString();
   return <p className="text-sm text-gray-700">{display}</p>;
 };
 
@@ -298,6 +310,10 @@ const PhotoGallery: types.Brick<PhotoGalleryProps> = ({
   const [, setStatusMessage] = useVisualEdit("statusMessage");
   const lastProcessedTriggerRef = useRef<number>(0);
   const [images, setImages] = useState<GalleryImage[]>([]);
+  const [activeLightboxIndex, setActiveLightboxIndex] = useState<number | null>(
+    null,
+  );
+  const [isLightboxVisible, setIsLightboxVisible] = useState(false);
 
   const applyStatus = useCallback(
     (nextState: LoadState, nextMessage: string) => {
@@ -308,7 +324,7 @@ const PhotoGallery: types.Brick<PhotoGalleryProps> = ({
         setStatusMessage(nextMessage);
       }
     },
-    [loadState, setLoadState, setStatusMessage, statusMessage]
+    [loadState, setLoadState, setStatusMessage, statusMessage],
   );
 
   useEffect(() => {
@@ -331,7 +347,10 @@ const PhotoGallery: types.Brick<PhotoGalleryProps> = ({
 
     if (!isDropboxFolderUrl(trimmedUrl)) {
       setImages([]);
-      applyStatus("error", "Unsupported Dropbox URL. Use a shared folder link.");
+      applyStatus(
+        "error",
+        "Unsupported Dropbox URL. Use a shared folder link.",
+      );
       return;
     }
 
@@ -343,10 +362,11 @@ const PhotoGallery: types.Brick<PhotoGalleryProps> = ({
       persistedUrls.map((src) => ({
         src,
         thumbSrc: resolvedThumbnails?.[src] || src,
-      }))
+      })),
     );
 
-    const hasResolvedForCurrentUrl = resolvedFromUrl?.trim() === trimmedUrl && persisted.length > 0;
+    const hasResolvedForCurrentUrl =
+      resolvedFromUrl?.trim() === trimmedUrl && persisted.length > 0;
 
     if (hasResolvedForCurrentUrl) {
       setImages(persisted.slice(0, resolvedMax));
@@ -354,15 +374,21 @@ const PhotoGallery: types.Brick<PhotoGalleryProps> = ({
       if (isAdmin && resolvedMaxImages > 0 && resolvedMax > resolvedMaxImages) {
         applyStatus(
           "warning",
-          "Current maxImages is higher than the saved result. Click 'Load Images' to refresh."
+          "Current maxImages is higher than the saved result. Click 'Load Images' to refresh.",
         );
-      } else if (isAdmin && normalizeThumbSize(resolvedThumbSize) !== requestedThumbSize) {
+      } else if (
+        isAdmin &&
+        normalizeThumbSize(resolvedThumbSize) !== requestedThumbSize
+      ) {
         applyStatus(
           "warning",
-          "Thumbnail size changed. Click 'Load Images' to refresh thumbnails."
+          "Thumbnail size changed. Click 'Load Images' to refresh thumbnails.",
         );
       } else {
-        applyStatus("success", `Loaded ${persisted.slice(0, resolvedMax).length} images.`);
+        applyStatus(
+          "success",
+          `Loaded ${persisted.slice(0, resolvedMax).length} images.`,
+        );
       }
 
       return;
@@ -373,7 +399,7 @@ const PhotoGallery: types.Brick<PhotoGalleryProps> = ({
       isAdmin ? "warning" : "idle",
       isAdmin
         ? "No saved images for this Dropbox folder yet. Click 'Load Images' in the Data panel."
-        : "Gallery images are not loaded yet."
+        : "Gallery images are not loaded yet.",
     );
   }, [
     applyStatus,
@@ -419,13 +445,20 @@ const PhotoGallery: types.Brick<PhotoGalleryProps> = ({
         throw new Error("Unsupported Dropbox URL. Use a shared folder link.");
       }
 
-      const resolved = await fetchDropboxFolderImages(trimmedUrl, resolvedMax, requestedThumbSize);
+      const resolved = await fetchDropboxFolderImages(
+        trimmedUrl,
+        resolvedMax,
+        requestedThumbSize,
+      );
       const now = new Date().toISOString();
       const nextResolvedImages = resolved.map((image) => image.src);
-      const nextResolvedThumbnails = resolved.reduce((acc, image) => {
-        acc[image.src] = image.thumbSrc || image.src;
-        return acc;
-      }, {} as Record<string, string>);
+      const nextResolvedThumbnails = resolved.reduce(
+        (acc, image) => {
+          acc[image.src] = image.thumbSrc || image.src;
+          return acc;
+        },
+        {} as Record<string, string>,
+      );
 
       setResolvedImages(nextResolvedImages);
       setResolvedThumbnails(nextResolvedThumbnails);
@@ -448,7 +481,7 @@ const PhotoGallery: types.Brick<PhotoGalleryProps> = ({
         if (!resolved.length) {
           applyStatus(
             "warning",
-            "No images were returned by the Dropbox relay. Ensure the folder is public and contains image files."
+            "No images were returned by the Dropbox relay. Ensure the folder is public and contains image files.",
           );
         } else {
           applyStatus("success", `Loaded ${resolved.length} images.`);
@@ -463,7 +496,7 @@ const PhotoGallery: types.Brick<PhotoGalleryProps> = ({
         applyStatus(
           "error",
           err?.message ||
-            "Unable to load Dropbox images from relay API. Check Dropbox credentials and folder visibility."
+            "Unable to load Dropbox images from relay API. Check Dropbox credentials and folder visibility.",
         );
       });
 
@@ -487,19 +520,52 @@ const PhotoGallery: types.Brick<PhotoGalleryProps> = ({
 
   const gridClass = useMemo(
     () => `${getGridClass(columns)} ${getGapClass(gap)} grid`,
-    [columns, gap]
+    [columns, gap],
   );
+  const activeLightboxImage =
+    activeLightboxIndex !== null && activeLightboxIndex >= 0
+      ? images[activeLightboxIndex] || null
+      : null;
+
+  useEffect(() => {
+    if (!activeLightboxImage) {
+      setIsLightboxVisible(false);
+    }
+  }, [activeLightboxImage]);
+
+  useEffect(() => {
+    if (activeLightboxIndex === null) {
+      return;
+    }
+
+    const onKeyDown = (event: KeyboardEvent) => {
+      if (event.key === "Escape") {
+        setActiveLightboxIndex(null);
+      }
+    };
+
+    window.addEventListener("keydown", onKeyDown);
+    return () => window.removeEventListener("keydown", onKeyDown);
+  }, [activeLightboxIndex]);
+
+  const closeLightbox = useCallback(() => {
+    setIsLightboxVisible(false);
+    window.setTimeout(() => setActiveLightboxIndex(null), 180);
+  }, []);
 
   const legacyPaddingClasses = `${getLegacyPaddingTopClass(
-    paddingTop || "16"
+    paddingTop || "16",
   )} ${getLegacyPaddingBottomClass(paddingBottom || "16")} px-6 lg:px-10`;
 
   const resolvedPadding = padding || legacyPaddingClasses;
   const resolvedBackgroundColour = backgroundColour?.color
     ? backgroundColour
     : backgroundColor?.color
-    ? { color: backgroundColor.color, className: backgroundColor.className || "" }
-    : ArKUIColours.WHITE.value;
+      ? {
+          color: backgroundColor.color,
+          className: backgroundColor.className || "",
+        }
+      : ArKUIColours.WHITE.value;
 
   return (
     <section
@@ -508,20 +574,30 @@ const PhotoGallery: types.Brick<PhotoGalleryProps> = ({
     >
       {images.length ? (
         <div className={gridClass}>
-          {images.map((image) => (
-            <figure key={image.src} className="overflow-hidden rounded-md bg-black/10">
-              <img
-                src={image.thumbSrc || image.src}
-                alt={image.caption || toCaption(image.src) || "Gallery image"}
-                loading="lazy"
-                className="w-full h-full object-cover aspect-square"
-                onError={(event) => {
-                  const target = event.currentTarget;
-                  if (target.src !== image.src) {
-                    target.src = image.src;
-                  }
+          {images.map((image, index) => (
+            <figure key={image.src} className="overflow-hidden bg-black/10">
+              <button
+                type="button"
+                className="block w-full cursor-zoom-in"
+                onClick={() => {
+                  setActiveLightboxIndex(index);
+                  setIsLightboxVisible(true);
                 }}
-              />
+                aria-label={`Open image ${index + 1} in lightbox`}
+              >
+                <img
+                  src={image.thumbSrc || image.src}
+                  alt={image.caption || toCaption(image.src) || "Gallery image"}
+                  loading="lazy"
+                  className="w-full h-full object-cover aspect-square"
+                  onError={(event) => {
+                    const target = event.currentTarget;
+                    if (target.src !== image.src) {
+                      target.src = image.src;
+                    }
+                  }}
+                />
+              </button>
               {showCaptions ? (
                 <figcaption className="text-xs p-2 opacity-80">
                   {image.caption || toCaption(image.src)}
@@ -529,6 +605,41 @@ const PhotoGallery: types.Brick<PhotoGalleryProps> = ({
               ) : null}
             </figure>
           ))}
+        </div>
+      ) : null}
+
+      {activeLightboxImage ? (
+        <div
+          className={`fixed inset-0 z-[9999] p-4 md:p-8 flex items-center justify-center transition-all duration-200 ${
+            isLightboxVisible
+              ? "bg-black/90 opacity-100"
+              : "bg-black/0 opacity-0"
+          }`}
+          onClick={closeLightbox}
+          role="dialog"
+          aria-modal="true"
+          aria-label="Image lightbox"
+        >
+          <button
+            type="button"
+            className="absolute top-4 right-4 px-3 py-2 text-white text-sm"
+            onClick={closeLightbox}
+            aria-label="Close lightbox"
+          >
+            CLOSE
+          </button>
+          <img
+            src={activeLightboxImage.src}
+            alt={
+              activeLightboxImage.caption ||
+              toCaption(activeLightboxImage.src) ||
+              "Gallery image"
+            }
+            className={`max-h-[90vh] max-w-[95vw] object-contain transition-all duration-200 ${
+              isLightboxVisible ? "opacity-100 scale-100" : "opacity-0 scale-95"
+            }`}
+            onClick={(event) => event.stopPropagation()}
+          />
         </div>
       ) : null}
     </section>
