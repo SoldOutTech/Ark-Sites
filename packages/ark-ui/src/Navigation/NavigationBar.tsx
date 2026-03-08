@@ -104,10 +104,10 @@ const NavigationBar: types.Brick<HeaderProps> = ({
     <Section
       backgroundColor={backgroundColor}
       borderBottom={"none"}
-      className="fixed inset-x-0 top-0 z-[1000] w-full"
+      className="fixed inset-x-0 top-0 z-[1000] w-full pointer-events-none"
     >
-      <div className="w-full h-40 bg-gradient-to-b from-black/60 to-transparent ">
-        <nav className="py-5 px-5 lg:px-20 flex justify-start items-cente">
+      <div className="w-full h-40 bg-gradient-to-b from-black/60 to-transparent pointer-events-none">
+        <nav className="py-5 px-5 lg:px-20 flex justify-start items-cente pointer-events-auto">
           {/* Branding */}
           <Link
             href="/"
