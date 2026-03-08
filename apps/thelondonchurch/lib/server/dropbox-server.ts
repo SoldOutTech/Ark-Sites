@@ -8,6 +8,7 @@ export interface DropboxEnv {
   refreshToken: string
   appKey: string
   appSecret: string
+  appSecretPrevious?: string
 }
 
 export type DropboxOperation = (client: Dropbox) => Promise<any>
@@ -34,12 +35,14 @@ export const readDropboxEnv = (): DropboxEnv => {
   const refreshToken = requireEnv('DROPBOX_REFRESH_TOKEN')
   const appKey = requireEnv('DROPBOX_APP_KEY')
   const appSecret = requireEnv('DROPBOX_APP_SECRET')
+  const appSecretPrevious = process.env.DROPBOX_APP_SECRET_PREVIOUS?.trim() || undefined
 
   return {
     accessToken,
     refreshToken,
     appKey,
     appSecret,
+    appSecretPrevious,
   }
 }
 
@@ -169,4 +172,30 @@ export const resolveThumbKey = (key: string, appSecret: string): ThumbResource =
   }
 
   throw new Error('Invalid thumbnail key payload resource.')
+}
+
+export const resolveThumbKeyWithSecrets = (key: string, appSecrets: string[]): ThumbResource => {
+  const uniqueSecrets = Array.from(new Set(appSecrets.map((secret) => secret?.trim()).filter(Boolean)))
+  if (!uniqueSecrets.length) {
+    throw new Error('No thumbnail key secrets are configured.')
+  }
+
+  for (const secret of uniqueSecrets) {
+    try {
+      return resolveThumbKey(key, secret)
+    } catch (error: any) {
+      const message = (error?.message || '').toLowerCase()
+      const isSignatureError =
+        message.includes('thumbnail key signature') || message.includes('thumbnail key format')
+
+      // Keep trying alternate secrets only for signature/format issues.
+      if (isSignatureError) {
+        continue
+      }
+
+      throw error
+    }
+  }
+
+  throw new Error('Invalid thumbnail key signature.')
 }

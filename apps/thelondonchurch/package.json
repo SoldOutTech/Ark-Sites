@@ -5,7 +5,7 @@
   "version": "2.0.0-beta.0",
   "author": "Aaron Baw",
   "scripts": {
-    "dev": "next dev",
+    "dev": "NEXT_IGNORE_INCORRECT_LOCKFILE=1 next dev",
     "build": "next build",
     "start": "next start",
     "postbuild": "next-sitemap"
@@ -20,7 +20,7 @@
     "@fortawesome/free-solid-svg-icons": "^6.5.1",
     "@fortawesome/react-fontawesome": "^0.2.0",
     "@next/font": "^14.0.4",
-    "@next/third-parties": "^15.3.0",
+    "@next/third-parties": "^15.5.12",
     "@swc/helpers": "^0.5.15",
     "@vercel/analytics": "^1.5.0",
     "@vercel/speed-insights": "^1.2.0",
@@ -33,7 +33,7 @@
     "hamburger-react": "^2.5.0",
     "jsonp": "^0.2.1",
     "lucide-react": "^0.487.0",
-    "next": "15.3.8",
+    "next": "^15.5.12",
     "next-sitemap": "^4.2.3",
     "next-themes": "^0.2.1",
     "pigeon-maps": "^0.21.3",

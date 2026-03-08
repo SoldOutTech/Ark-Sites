@@ -2,7 +2,7 @@ import type { NextApiRequest, NextApiResponse } from 'next'
 import {
   createDropboxCaller,
   readDropboxEnv,
-  resolveThumbKey,
+  resolveThumbKeyWithSecrets,
 } from '../../lib/server/dropbox-server'
 
 type ThumbnailError = {
@@ -98,7 +98,7 @@ export default async function handler(
 
   try {
     const env = readDropboxEnv()
-    const resource = resolveThumbKey(key, env.appSecret)
+    const resource = resolveThumbKeyWithSecrets(key, [env.appSecret, env.appSecretPrevious || ''])
     const callDropbox = createDropboxCaller(env)
     let dropboxResource =
       resource.tag === 'link'
@@ -162,6 +162,13 @@ export default async function handler(
       message.toLowerCase().includes('thumbnail key') ||
       message.toLowerCase().includes('missing required environment variable')
     ) {
+      if (message.toLowerCase().includes('thumbnail key signature')) {
+        return res.status(400).json({
+          error:
+            'Invalid thumbnail key signature. Reload images in the PhotoGallery editor to refresh thumbnail keys.',
+        })
+      }
+
       return res.status(400).json({ error: message })
     }
 

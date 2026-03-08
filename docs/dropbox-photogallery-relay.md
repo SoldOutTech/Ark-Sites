@@ -57,6 +57,7 @@ Set these server-side env vars for `thelondonchurch`:
 - `DROPBOX_REFRESH_TOKEN`
 - `DROPBOX_APP_KEY`
 - `DROPBOX_APP_SECRET`
+- `DROPBOX_APP_SECRET_PREVIOUS` (optional, recommended during app-secret rotation)
 
 Do not expose these via `NEXT_PUBLIC_*`.
 
@@ -75,6 +76,7 @@ DROPBOX_ACCESS_TOKEN=...
 DROPBOX_REFRESH_TOKEN=...
 DROPBOX_APP_KEY=...
 DROPBOX_APP_SECRET=...
+DROPBOX_APP_SECRET_PREVIOUS=...
 ```
 
 ### Production
@@ -111,6 +113,16 @@ Check:
 1. `DROPBOX_REFRESH_TOKEN`, `DROPBOX_APP_KEY`, `DROPBOX_APP_SECRET` are all valid.
 2. App scopes include `files.metadata.read`, `sharing.read`, `sharing.write`.
 3. Token belongs to the intended Dropbox app/workspace.
+
+### Many `/api/dropbox-thumbnail` requests return 400
+
+This usually means thumbnail keys were generated with an older app secret.
+
+Check:
+
+1. Keep current secret in `DROPBOX_APP_SECRET`.
+2. Put prior secret in `DROPBOX_APP_SECRET_PREVIOUS` during transition.
+3. In React Bricks editor, click `Load Images` again to refresh saved thumbnail keys.
 
 ### `Invalid Dropbox folder URL`
 

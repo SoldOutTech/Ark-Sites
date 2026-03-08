@@ -7,7 +7,7 @@
     "packages/*"
   ],
   "scripts": {
-    "dev:london": "npm run dev --workspace=apps/thelondonchurch",
+    "dev:london": "npm run dev --prefix apps/thelondonchurch",
     "dev:paris": "npm run dev --workspace=apps/theparischurch",
     "dev:berlin": "npm run dev --workspace=apps/theberlinchurch",
     "dev:dublin": "npm run dev --workspace=apps/thedublinchurch",

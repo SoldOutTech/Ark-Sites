@@ -1,3 +1,5 @@
+const path = require('path')
+
 module.exports = {
   async redirects() {
     const rules = []
@@ -77,5 +79,6 @@ module.exports = {
     defaultLocale: 'en',
     localeDetection: false,
   },
+  outputFileTracingRoot: path.join(__dirname, '../..'),
   transpilePackages: ['@bazel-digital/ark-ui'],
 }

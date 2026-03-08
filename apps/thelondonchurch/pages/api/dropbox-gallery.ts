@@ -109,8 +109,22 @@ export default async function handler(
     return res.status(200).json(payload)
   } catch (error: any) {
     const message = error?.message || String(error)
+    const status = error?.status
+    const summary = error?.error?.error_summary || error?.error_summary || ''
+    const tag = error?.error?.['.tag'] || error?.error?.error?.['.tag'] || ''
+    const detail = [status ? `status=${status}` : '', tag ? `tag=${tag}` : '', summary || '']
+      .filter(Boolean)
+      .join(' ')
+
+    console.error('Dropbox gallery relay error', {
+      message,
+      status,
+      tag,
+      summary,
+    })
+
     return res.status(502).json({
-      error: `Dropbox relay failed: ${message}`,
+      error: `Dropbox relay failed: ${message}${detail ? ` (${detail})` : ''}`,
     })
   }
 }
