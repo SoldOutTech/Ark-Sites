@@ -1,41 +1,12 @@
-import { Dropbox } from 'dropbox'
+import { createDropboxCaller, createThumbKey, readDropboxEnv } from './dropbox-server'
 
 const IMAGE_EXTENSIONS = new Set(['png', 'jpg', 'jpeg', 'gif', 'webp', 'avif'])
-const DROPBOX_TOKEN_URL = 'https://api.dropboxapi.com/oauth2/token'
 
 export interface DropboxGalleryImage {
   src: string
   name: string
   caption: string
-}
-
-interface DropboxEnv {
-  accessToken: string
-  refreshToken: string
-  appKey: string
-  appSecret: string
-}
-
-const requireEnv = (name: string) => {
-  const value = process.env[name]
-  if (!value || !value.trim()) {
-    throw new Error(`Missing required environment variable: ${name}`)
-  }
-  return value.trim()
-}
-
-const readDropboxEnv = (): DropboxEnv => {
-  const accessToken = requireEnv('DROPBOX_ACCESS_TOKEN')
-  const refreshToken = requireEnv('DROPBOX_REFRESH_TOKEN')
-  const appKey = requireEnv('DROPBOX_APP_KEY')
-  const appSecret = requireEnv('DROPBOX_APP_SECRET')
-
-  return {
-    accessToken,
-    refreshToken,
-    appKey,
-    appSecret,
-  }
+  thumbKey?: string
 }
 
 const isImageFile = (name: string) => {
@@ -61,62 +32,8 @@ const toCaption = (filename: string) =>
     .replace(/[-_]+/g, ' ')
     .trim()
 
-const isAuthExpiredError = (error: any) => {
-  if (error?.status === 401) {
-    return true
-  }
-
-  const textParts = [
-    typeof error?.error === 'string' ? error.error : '',
-    error?.error?.error_summary || '',
-    error?.error_summary || '',
-    error?.message || '',
-  ]
-  const text = textParts.join(' ').toLowerCase()
-  return text.includes('expired_access_token') || text.includes('invalid_access_token')
-}
-
-const refreshAccessToken = async (
-  refreshToken: string,
-  appKey: string,
-  appSecret: string
-) => {
-  const body = new URLSearchParams({
-    grant_type: 'refresh_token',
-    refresh_token: refreshToken,
-    client_id: appKey,
-    client_secret: appSecret,
-  })
-
-  const response = await fetch(DROPBOX_TOKEN_URL, {
-    method: 'POST',
-    headers: { 'content-type': 'application/x-www-form-urlencoded' },
-    body,
-  })
-
-  const responseText = await response.text()
-  let parsed: any = null
-  try {
-    parsed = JSON.parse(responseText)
-  } catch {
-    parsed = null
-  }
-
-  if (!response.ok) {
-    const detail = parsed?.error_description || parsed?.error || responseText
-    throw new Error(`Failed to refresh Dropbox access token: ${detail}`)
-  }
-
-  const newAccessToken = parsed?.access_token
-  if (!newAccessToken) {
-    throw new Error('Dropbox token refresh succeeded but no access_token was returned.')
-  }
-
-  return newAccessToken
-}
-
 const listFolderPage = async (
-  callDropbox: (operation: (client: Dropbox) => Promise<any>) => Promise<any>,
+  callDropbox: (operation: (client: any) => Promise<any>) => Promise<any>,
   sharedFolderUrl: string,
   folderPath: string
 ) => {
@@ -143,7 +60,7 @@ const listFolderPage = async (
 }
 
 const listAllEntriesFromSharedFolder = async (
-  callDropbox: (operation: (client: Dropbox) => Promise<any>) => Promise<any>,
+  callDropbox: (operation: (client: any) => Promise<any>) => Promise<any>,
   sharedFolderUrl: string
 ) => {
   const allEntries: any[] = []
@@ -174,7 +91,7 @@ const listAllEntriesFromSharedFolder = async (
 }
 
 const getOrCreateFileSharedLink = async (
-  callDropbox: (operation: (client: Dropbox) => Promise<any>) => Promise<any>,
+  callDropbox: (operation: (client: any) => Promise<any>) => Promise<any>,
   pathOrId: string
 ) => {
   const existing = await callDropbox((client) =>
@@ -208,25 +125,10 @@ export const resolveDropboxGallery = async (
   sharedFolderUrl: string,
   maxImages?: number
 ): Promise<DropboxGalleryImage[]> => {
-  const { accessToken, refreshToken, appKey, appSecret } = readDropboxEnv()
-
-  let activeToken = accessToken
-  let dbx = new Dropbox({ accessToken: activeToken })
+  const env = readDropboxEnv()
+  const { appSecret } = env
+  const callDropbox = createDropboxCaller(env)
   const limit = clampMaxImages(maxImages)
-
-  const callDropbox = async (operation: (client: Dropbox) => Promise<any>) => {
-    try {
-      return await operation(dbx)
-    } catch (error: any) {
-      if (!isAuthExpiredError(error)) {
-        throw error
-      }
-
-      activeToken = await refreshAccessToken(refreshToken, appKey, appSecret)
-      dbx = new Dropbox({ accessToken: activeToken })
-      return operation(dbx)
-    }
-  }
 
   const allEntries = await listAllEntriesFromSharedFolder(callDropbox, sharedFolderUrl)
   const imageEntries = allEntries.filter(
@@ -245,6 +147,7 @@ export const resolveDropboxGallery = async (
       src: toRawUrl(sharedLink),
       name: entry.name,
       caption: toCaption(entry.name),
+      thumbKey: createThumbKey({ tag: 'link', url: sharedLink }, appSecret),
     })
   }
 

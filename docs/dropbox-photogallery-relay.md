@@ -3,9 +3,11 @@
 This project uses a server-side relay API for PhotoGallery so the browser never talks directly to Dropbox APIs.
 
 - Route: `/api/dropbox-gallery`
+- Route: `/api/dropbox-thumbnail`
 - App: `apps/thelondonchurch`
 - Input: Dropbox shared folder URL (`https://www.dropbox.com/scl/fo/...`)
 - Output: direct image URLs (`raw=1`) for rendering in PhotoGallery
+- Output: proxied thumbnails for faster grid loading in PhotoGallery
 
 ## Editor workflow
 
@@ -41,6 +43,7 @@ Create a custom Dropbox app in [Dropbox App Console](https://www.dropbox.com/dev
 Enable these scopes in the app permissions:
 
 - `files.metadata.read`
+- `files.content.read`
 - `sharing.read`
 - `sharing.write`
 

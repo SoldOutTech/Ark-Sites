@@ -95,7 +95,7 @@ When you update `packages/ark-ui`, those changes are immediately available to ev
 
 The London app uses a server-side Dropbox relay for PhotoGallery folder URLs.
 
-In the editor, set the folder URL and click `Load Images` once to persist resolved image URLs into block props.
+In the editor, set the folder URL and click `Load Images` once to persist resolved image and thumbnail URLs into block props.
 
 Setup and credential details:
 

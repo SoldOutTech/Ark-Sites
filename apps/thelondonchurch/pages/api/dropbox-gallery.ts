@@ -2,7 +2,13 @@ import type { NextApiRequest, NextApiResponse } from 'next'
 import { resolveDropboxGallery } from '../../lib/server/dropbox-gallery'
 
 type GallerySuccess = {
-  images: Array<{ src: string; caption: string; name: string }>
+  images: Array<{
+    src: string
+    caption: string
+    name: string
+    thumbKey?: string
+    thumbSrc?: string
+  }>
   meta: {
     count: number
     source: 'dropbox-api'
@@ -37,6 +43,12 @@ const normalizeMaxImages = (value: string | string[] | undefined) => {
   return Math.max(1, parsed)
 }
 
+const normalizeThumbSize = (value: string | string[] | undefined) => {
+  const raw = Array.isArray(value) ? value[0] : value
+  const candidate = (raw || '512').trim()
+  return ['256', '512', '1024'].includes(candidate) ? candidate : '512'
+}
+
 export default async function handler(
   req: NextApiRequest,
   res: NextApiResponse<GallerySuccess | GalleryError>
@@ -61,7 +73,8 @@ export default async function handler(
   }
 
   const maxImages = normalizeMaxImages(req.query.maxImages)
-  const cacheKey = `${dropboxUrl}|${maxImages}`
+  const thumbSize = normalizeThumbSize(req.query.thumbSize)
+  const cacheKey = `${dropboxUrl}|${maxImages}|${thumbSize}`
   const now = Date.now()
   const cached = cache.get(cacheKey)
 
@@ -71,7 +84,14 @@ export default async function handler(
   }
 
   try {
-    const images = await resolveDropboxGallery(dropboxUrl, maxImages)
+    const images = await resolveDropboxGallery(dropboxUrl, maxImages).then((rows) =>
+      rows.map((row) => ({
+        ...row,
+        thumbSrc: row.thumbKey
+          ? `/api/dropbox-thumbnail?key=${encodeURIComponent(row.thumbKey)}&size=${thumbSize}`
+          : undefined,
+      }))
+    )
     const payload: GallerySuccess = {
       images,
       meta: {

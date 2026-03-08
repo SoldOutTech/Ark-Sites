@@ -12,22 +12,26 @@ interface PhotoGalleryProps {
   columns: "2" | "3" | "4";
   gap: "2" | "4" | "6";
   showCaptions: boolean;
+  thumbnailResolution?: "256" | "512" | "1024";
   backgroundColour?: ArkUIColourValue;
   padding?: string;
   backgroundColor?: { color: string; className: string };
   paddingTop?: string;
   paddingBottom?: string;
   resolvedImages?: string[];
+  resolvedThumbnails?: Record<string, string>;
   resolvedFromUrl?: string;
   resolvedMaxImages?: number;
+  resolvedThumbSize?: string;
   resolvedAt?: string;
   loadImagesTrigger?: number;
   loadState?: LoadState;
   statusMessage?: string;
 }
 
-interface RelayImage {
+interface GalleryImage {
   src: string;
+  thumbSrc?: string;
   caption?: string;
   name?: string;
 }
@@ -110,7 +114,28 @@ const normalizeMaxImages = (value: number) => {
   return Math.max(1, Math.floor(value));
 };
 
-const dedupeImageUrls = (urls: string[]) => Array.from(new Set(urls.filter(Boolean)));
+const normalizeThumbSize = (value?: string) => {
+  if (value === "256" || value === "1024") {
+    return value;
+  }
+  return "512";
+};
+
+const dedupeImages = (images: GalleryImage[]) => {
+  const map = new Map<string, GalleryImage>();
+
+  for (const image of images) {
+    if (!image?.src) {
+      continue;
+    }
+
+    if (!map.has(image.src)) {
+      map.set(image.src, image);
+    }
+  }
+
+  return Array.from(map.values());
+};
 
 const getLegacyPaddingTopClass = (padding: string) => {
   switch (padding) {
@@ -154,10 +179,15 @@ const getLegacyPaddingBottomClass = (padding: string) => {
   }
 };
 
-const fetchDropboxFolderImages = async (dropboxUrl: string, maxImages: number) => {
+const fetchDropboxFolderImages = async (
+  dropboxUrl: string,
+  maxImages: number,
+  thumbSize: string
+) => {
   const url = new URL("/api/dropbox-gallery", window.location.origin);
   url.searchParams.set("dropboxUrl", dropboxUrl);
   url.searchParams.set("maxImages", String(maxImages));
+  url.searchParams.set("thumbSize", normalizeThumbSize(thumbSize));
 
   const response = await fetch(url.toString(), {
     method: "GET",
@@ -175,11 +205,18 @@ const fetchDropboxFolderImages = async (dropboxUrl: string, maxImages: number) =
     );
   }
 
-  const relayImages = Array.isArray(data?.images)
-    ? (data.images as RelayImage[]).map((image) => image?.src || "").filter(Boolean)
-    : [];
+  const relayImages = Array.isArray(data?.images) ? (data.images as GalleryImage[]) : [];
 
-  return dedupeImageUrls(relayImages);
+  return dedupeImages(
+    relayImages
+      .map((image) => ({
+        src: image?.src || "",
+        thumbSrc: image?.thumbSrc || image?.src || "",
+        caption: image?.caption || "",
+        name: image?.name || "",
+      }))
+      .filter((image) => Boolean(image.src))
+  );
 };
 
 const LoadImagesKnob: React.FC<types.ICustomKnobProps> = ({ onChange }) => (
@@ -234,14 +271,17 @@ const PhotoGallery: types.Brick<PhotoGalleryProps> = ({
   columns = "3",
   gap = "4",
   showCaptions = false,
+  thumbnailResolution = "512",
   backgroundColour = ArKUIColours.WHITE.value,
   padding = "lg:p-20 p-4",
   backgroundColor,
   paddingTop,
   paddingBottom,
   resolvedImages = [],
+  resolvedThumbnails = {},
   resolvedFromUrl = "",
   resolvedMaxImages = 0,
+  resolvedThumbSize = "512",
   resolvedAt = "",
   loadImagesTrigger = 0,
   loadState = "idle",
@@ -249,13 +289,16 @@ const PhotoGallery: types.Brick<PhotoGalleryProps> = ({
 }) => {
   const { isAdmin } = useAdminContext();
   const [, setResolvedImages] = useVisualEdit("resolvedImages");
+  const [, setResolvedThumbnails] = useVisualEdit("resolvedThumbnails");
   const [, setResolvedFromUrl] = useVisualEdit("resolvedFromUrl");
   const [, setResolvedMaxImages] = useVisualEdit("resolvedMaxImages");
+  const [, setResolvedThumbSize] = useVisualEdit("resolvedThumbSize");
   const [, setResolvedAt] = useVisualEdit("resolvedAt");
   const [, setLoadState] = useVisualEdit("loadState");
   const [, setStatusMessage] = useVisualEdit("statusMessage");
   const lastProcessedTriggerRef = useRef<number>(0);
-  const [images, setImages] = useState<string[]>([]);
+  const [images, setImages] = useState<GalleryImage[]>([]);
+
   const applyStatus = useCallback(
     (nextState: LoadState, nextMessage: string) => {
       if (loadState !== nextState) {
@@ -271,6 +314,7 @@ const PhotoGallery: types.Brick<PhotoGalleryProps> = ({
   useEffect(() => {
     const trimmedUrl = dropboxUrl?.trim();
     const resolvedMax = normalizeMaxImages(maxImages);
+    const requestedThumbSize = normalizeThumbSize(thumbnailResolution);
 
     if (!trimmedUrl) {
       setImages([]);
@@ -279,7 +323,8 @@ const PhotoGallery: types.Brick<PhotoGalleryProps> = ({
     }
 
     if (isDirectImageUrl(trimmedUrl)) {
-      setImages([ensureDropboxRawUrl(trimmedUrl)]);
+      const raw = ensureDropboxRawUrl(trimmedUrl);
+      setImages([{ src: raw, thumbSrc: raw }]);
       applyStatus("success", "Using direct image URL.");
       return;
     }
@@ -290,7 +335,17 @@ const PhotoGallery: types.Brick<PhotoGalleryProps> = ({
       return;
     }
 
-    const persisted = Array.isArray(resolvedImages) ? dedupeImageUrls(resolvedImages) : [];
+    const persistedUrls = Array.isArray(resolvedImages)
+      ? Array.from(new Set(resolvedImages.filter(Boolean)))
+      : [];
+
+    const persisted = dedupeImages(
+      persistedUrls.map((src) => ({
+        src,
+        thumbSrc: resolvedThumbnails?.[src] || src,
+      }))
+    );
+
     const hasResolvedForCurrentUrl = resolvedFromUrl?.trim() === trimmedUrl && persisted.length > 0;
 
     if (hasResolvedForCurrentUrl) {
@@ -300,6 +355,11 @@ const PhotoGallery: types.Brick<PhotoGalleryProps> = ({
         applyStatus(
           "warning",
           "Current maxImages is higher than the saved result. Click 'Load Images' to refresh."
+        );
+      } else if (isAdmin && normalizeThumbSize(resolvedThumbSize) !== requestedThumbSize) {
+        applyStatus(
+          "warning",
+          "Thumbnail size changed. Click 'Load Images' to refresh thumbnails."
         );
       } else {
         applyStatus("success", `Loaded ${persisted.slice(0, resolvedMax).length} images.`);
@@ -320,9 +380,12 @@ const PhotoGallery: types.Brick<PhotoGalleryProps> = ({
     dropboxUrl,
     isAdmin,
     maxImages,
+    thumbnailResolution,
     resolvedFromUrl,
     resolvedImages,
+    resolvedThumbnails,
     resolvedMaxImages,
+    resolvedThumbSize,
   ]);
 
   useEffect(() => {
@@ -331,6 +394,7 @@ const PhotoGallery: types.Brick<PhotoGalleryProps> = ({
     if (!isAdmin || !loadImagesTrigger) {
       return;
     }
+
     if (loadImagesTrigger === lastProcessedTriggerRef.current) {
       return;
     }
@@ -340,6 +404,7 @@ const PhotoGallery: types.Brick<PhotoGalleryProps> = ({
 
     const trimmedUrl = dropboxUrl?.trim();
     const resolvedMax = normalizeMaxImages(maxImages);
+    const requestedThumbSize = normalizeThumbSize(thumbnailResolution);
 
     const loadImages = async () => {
       if (!trimmedUrl) {
@@ -354,12 +419,19 @@ const PhotoGallery: types.Brick<PhotoGalleryProps> = ({
         throw new Error("Unsupported Dropbox URL. Use a shared folder link.");
       }
 
-      const resolved = await fetchDropboxFolderImages(trimmedUrl, resolvedMax);
+      const resolved = await fetchDropboxFolderImages(trimmedUrl, resolvedMax, requestedThumbSize);
       const now = new Date().toISOString();
+      const nextResolvedImages = resolved.map((image) => image.src);
+      const nextResolvedThumbnails = resolved.reduce((acc, image) => {
+        acc[image.src] = image.thumbSrc || image.src;
+        return acc;
+      }, {} as Record<string, string>);
 
-      setResolvedImages(resolved);
+      setResolvedImages(nextResolvedImages);
+      setResolvedThumbnails(nextResolvedThumbnails);
       setResolvedFromUrl(trimmedUrl);
       setResolvedMaxImages(resolvedMax);
+      setResolvedThumbSize(requestedThumbSize);
       setResolvedAt(now);
 
       return resolved;
@@ -404,19 +476,24 @@ const PhotoGallery: types.Brick<PhotoGalleryProps> = ({
     isAdmin,
     loadImagesTrigger,
     maxImages,
+    thumbnailResolution,
     setResolvedAt,
     setResolvedFromUrl,
     setResolvedImages,
+    setResolvedThumbnails,
     setResolvedMaxImages,
+    setResolvedThumbSize,
   ]);
 
   const gridClass = useMemo(
     () => `${getGridClass(columns)} ${getGapClass(gap)} grid`,
     [columns, gap]
   );
+
   const legacyPaddingClasses = `${getLegacyPaddingTopClass(
     paddingTop || "16"
   )} ${getLegacyPaddingBottomClass(paddingBottom || "16")} px-6 lg:px-10`;
+
   const resolvedPadding = padding || legacyPaddingClasses;
   const resolvedBackgroundColour = backgroundColour?.color
     ? backgroundColour
@@ -431,20 +508,23 @@ const PhotoGallery: types.Brick<PhotoGalleryProps> = ({
     >
       {images.length ? (
         <div className={gridClass}>
-          {images.map((url) => (
-            <figure
-              key={url}
-              className="overflow-hidden rounded-md bg-black/10"
-            >
+          {images.map((image) => (
+            <figure key={image.src} className="overflow-hidden rounded-md bg-black/10">
               <img
-                src={url}
-                alt={toCaption(url) || "Gallery image"}
+                src={image.thumbSrc || image.src}
+                alt={image.caption || toCaption(image.src) || "Gallery image"}
                 loading="lazy"
                 className="w-full h-full object-cover aspect-square"
+                onError={(event) => {
+                  const target = event.currentTarget;
+                  if (target.src !== image.src) {
+                    target.src = image.src;
+                  }
+                }}
               />
               {showCaptions ? (
                 <figcaption className="text-xs p-2 opacity-80">
-                  {toCaption(url)}
+                  {image.caption || toCaption(image.src)}
                 </figcaption>
               ) : null}
             </figure>
@@ -465,14 +545,17 @@ PhotoGallery.schema = {
     columns: "3",
     gap: "4",
     showCaptions: false,
+    thumbnailResolution: "512",
     backgroundColour: ArKUIColours.WHITE.value,
     padding: "lg:p-20 p-4",
     backgroundColor: undefined,
     paddingTop: undefined,
     paddingBottom: undefined,
     resolvedImages: [],
+    resolvedThumbnails: {},
     resolvedFromUrl: "",
     resolvedMaxImages: 0,
+    resolvedThumbSize: "512",
     resolvedAt: "",
     loadImagesTrigger: 0,
     loadState: "idle",
@@ -491,6 +574,21 @@ PhotoGallery.schema = {
           name: "maxImages",
           label: "Max Images",
           type: types.SideEditPropType.Number,
+        },
+        {
+          name: "thumbnailResolution",
+          label: "Thumb Size",
+          type: types.SideEditPropType.Select,
+          selectOptions: {
+            display: types.OptionsDisplay.Select,
+            options: [
+              { label: "256 x 256", value: "256" },
+              { label: "512 x 512", value: "512" },
+              { label: "1024 x 1024", value: "1024" },
+            ],
+          },
+          helperText:
+            "512 uses Dropbox's closest preset and is recommended as the default.",
         },
         {
           name: "loadImagesTrigger",

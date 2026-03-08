@@ -43,7 +43,7 @@ PhotoGallery Dropbox folder links use a server-side relay endpoint in this app.
 Editor usage:
 
 1. Set `Dropbox URL` and `Max Images` in the PhotoGallery Data panel.
-2. Click `Load Images` to persist resolved image URLs into brick props.
+2. Click `Load Images` to persist resolved image and thumbnail URLs into brick props.
 
 Required Dropbox env vars for the relay:
 
