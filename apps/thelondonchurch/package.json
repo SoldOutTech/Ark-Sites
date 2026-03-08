@@ -5,7 +5,7 @@
   "version": "2.0.0-beta.0",
   "author": "Aaron Baw",
   "scripts": {
-    "dev": "NEXT_IGNORE_INCORRECT_LOCKFILE=1 next dev",
+    "dev": "next dev",
     "build": "next build",
     "start": "next start",
     "postbuild": "next-sitemap"
