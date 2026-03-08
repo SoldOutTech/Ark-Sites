@@ -91,6 +91,16 @@ All apps consume the local `ark-ui` package directly:
 
 When you update `packages/ark-ui`, those changes are immediately available to every app in this monorepo workflow.
 
+## PhotoGallery Dropbox Relay
+
+The London app uses a server-side Dropbox relay for PhotoGallery folder URLs.
+
+In the editor, set the folder URL and click `Load Images` once to persist resolved image and thumbnail URLs into block props.
+
+Setup and credential details:
+
+- [Dropbox PhotoGallery Relay docs](/Users/aaronbaw/Code/Ark Sites/docs/dropbox-photogallery-relay.md)
+
 ## Deployment (Vercel)
 
 Use one Vercel project per app, all connected to this same repository.
