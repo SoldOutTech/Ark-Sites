@@ -11,12 +11,12 @@ const config: types.ReactBricksConfig = {
   bricks,
   pageTypes,
   customFields: [],
-  logo: '/dicc_logo.svg',
+  logo: '/berlin_logo_black_large.png',
   loginUI: {
-    logo: '/dicc_logo.svg',
-    logoWidth: 35,
-    logoHeight: 35,
-    sideImage: './dublin_worship.jpg',
+    logo: '/berlin_logo_black_large.png',
+    logoWidth: 36,
+    logoHeight: 48,
+    sideImage: './dashboard_login_photo.jpg',
     welcomeText: "The Berlin Church Admin",
     welcomeTextStyle: {
       fontWeight: 'medium',
