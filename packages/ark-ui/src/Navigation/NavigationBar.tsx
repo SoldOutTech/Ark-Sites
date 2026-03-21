@@ -49,7 +49,7 @@ const NavigationBar: types.Brick<HeaderProps> = ({
 
   const MobileNavigationLinks = () => {
     return (
-      <div className="md:hidden flex w-full">
+      <div ref={ref} className="md:hidden flex w-full">
         <div className="z-10 ml-auto">
           {mounted && (
             <Hamburger
@@ -62,7 +62,11 @@ const NavigationBar: types.Brick<HeaderProps> = ({
         </div>
 
         {/* Wrap all the mobile navigation items in a div to ensure that we can hide any overflow caused by the scaling */}
-        <div className="fixed inset-0 w-full h-full overflow-hidden scroll">
+        <div
+          className={`fixed inset-0 w-full h-full overflow-hidden scroll ${
+            mobileMenuOpen ? "pointer-events-auto" : "pointer-events-none"
+          }`}
+        >
           <div
             className={`${
               mobileMenuOpen
