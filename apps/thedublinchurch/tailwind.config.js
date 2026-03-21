@@ -6,6 +6,7 @@ module.exports = {
     './components/**/*.tsx',
     './react-bricks/**/*.{ts,tsx}',
     './node_modules/@bazel-digital/ark-ui/**/*.{js,ts,jsx,tsx}',
+    '../../packages/ark-ui/**/*.{js,ts,jsx,tsx}',
   ],
   darkMode: 'class',
   theme: {
