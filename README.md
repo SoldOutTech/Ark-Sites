@@ -1,21 +1,77 @@
-# Ark Sites
+<p align="center">
+  <img src="docs/assets/ark-sites-logo.png" alt="Ark Sites logo" width="180" />
+</p>
 
-A shared platform for church websites built with a single design system, a unified engineering workflow, and local editorial control through React Bricks.
+<h1 align="center">Ark Sites</h1>
+
+<p align="center">
+  A shared platform for city church websites, built around one design system,
+  one engineering workflow, and local editorial control through React Bricks.
+</p>
+
+<p align="center">
+  <a href="#local-development">Local Development</a> ·
+  <a href="#applications">Applications</a> ·
+  <a href="#shared-ui">Shared UI</a> ·
+  <a href="#deployment">Deployment</a>
+</p>
+
+<p align="center">
+  <img alt="Next.js" src="https://img.shields.io/badge/Next.js-15-000000?logo=nextdotjs&logoColor=white" />
+  <img alt="React" src="https://img.shields.io/badge/React-19-61DAFB?logo=react&logoColor=111111" />
+  <img alt="TypeScript" src="https://img.shields.io/badge/TypeScript-5-3178C6?logo=typescript&logoColor=white" />
+  <img alt="Tailwind CSS" src="https://img.shields.io/badge/Tailwind_CSS-3-06B6D4?logo=tailwindcss&logoColor=white" />
+  <img alt="Node.js" src="https://img.shields.io/badge/Node.js-%3E%3D22-339933?logo=nodedotjs&logoColor=white" />
+</p>
+
+## Overview
+
+Ark Sites is a monorepo for building and maintaining church websites across
+multiple cities. Each city has its own Next.js application, React Bricks
+content model, environment variables, and deployment target, while shared
+presentation components live in a single local UI package.
+
+The goal is simple: preserve local flexibility while raising the quality,
+consistency, and maintainability of every site built on the platform.
 
 ## Vision
 
-Then the Lord said to Moses, “See, I have chosen Bezalel son of Uri, the son of Hur, of the tribe of Judah, and I have filled him with the Spirit of God, with wisdom, with understanding, with knowledge and with all kinds of skills—to make artistic designs for work in gold, silver and bronze, to cut and set stones, to work in wood, and to engage in all kinds of crafts. Moreover, I have appointed Oholiab son of Ahisamak, of the tribe of Dan, to help him. Also I have given ability to all the skilled workers to make everything I have commanded you
-Exodus 31:1-6
+Then the Lord said to Moses:
 
-Moses was given a pattern that was used to build the tabernacle. In the same way, we want to define the "pattern" that is used to build the digital tabernacle, on the internet. A custom designed design system sits at the heart of the Sold Out Movement's web design, with a unified, shared design language that affords a certain level of excellence, polish and uniformity, while giving flexibility to each local Church to tune and tweak each site to their specific preferences, flavours and style.
+> See, I have chosen Bezalel son of Uri, the son of Hur, of the tribe of
+> Judah, and I have filled him with the Spirit of God, with wisdom, with
+> understanding, with knowledge and with all kinds of skills.
+>
+> Exodus 31:1-6
 
-## Tech Stack
+Moses was given a pattern for building the tabernacle. In the same spirit,
+Ark Sites defines a pattern for building digital tabernacles on the internet:
+a shared design language that brings excellence, polish, and consistency to
+the Sold Out Movement's web presence while giving each local church room to
+shape its site around its city, culture, and ministry needs.
 
-- Framework: Next.js
-- CMS: React Bricks
-- UI System: `@bazel-digital/ark-ui` (local workspace package in this repo)
-- Styling: Tailwind CSS
-- Hosting: Vercel
+## Applications
+
+| City | Workspace | Development | Build |
+| --- | --- | --- | --- |
+| London | `apps/thelondonchurch` | `npm run dev:london` | `npm run build:london` |
+| Paris | `apps/theparischurch` | `npm run dev:paris` | `npm run build:paris` |
+| Berlin | `apps/theberlinchurch` | `npm run dev:berlin` | `npm run build:berlin` |
+| Dublin | `apps/thedublinchurch` | `npm run dev:dublin` | `npm run build:dublin` |
+| Edinburgh | `apps/theedinburghchurch` | `npm run dev:edinburgh` | `npm run build:edinburgh` |
+
+## Platform
+
+| Layer | Technology |
+| --- | --- |
+| Framework | Next.js |
+| UI | React 19 |
+| CMS | React Bricks |
+| Shared components | `@bazel-digital/ark-ui` |
+| Styling | Tailwind CSS |
+| Hosting | Vercel |
+| Package manager | npm workspaces |
+| Runtime | Node.js 22+ |
 
 ## Repository Structure
 
@@ -28,21 +84,27 @@ apps/
   theedinburghchurch/
 packages/
   ark-ui/
+docs/
+  assets/
 ```
 
-- `apps/*`: Individual church sites with their own content model, env vars, and deployment target.
-- `packages/ark-ui`: Shared React Bricks-compatible component library used by all apps.
+| Path | Purpose |
+| --- | --- |
+| `apps/*` | Individual church sites with their own content model, environment variables, and deployment target. |
+| `packages/ark-ui` | Shared React Bricks-compatible component library used by every app. |
+| `docs` | Supporting implementation notes, setup guides, and README assets. |
 
-## Why This Architecture
+## Architecture
 
-- One codebase reduces duplication and maintenance overhead.
-- A shared UI package keeps interaction and brand language consistent.
-- Local app boundaries preserve flexibility for city-specific content and experience.
-- Changes to shared UI can be tested across multiple apps immediately.
+- One codebase reduces duplicated implementation and maintenance work.
+- A shared UI package keeps interaction patterns and brand language consistent.
+- Local app boundaries preserve flexibility for city-specific content and site behavior.
+- Shared UI changes can be tested across all city apps from the same workspace.
 
 ## React Bricks Workflow
 
-Each app integrates React Bricks for visual content editing and page management.
+Each app integrates React Bricks for visual content editing and page
+management.
 
 - Developers define and evolve reusable bricks in `packages/ark-ui`.
 - Editors manage page content from each app's React Bricks dashboard.
@@ -63,56 +125,60 @@ Install dependencies once from the monorepo root:
 npm install
 ```
 
-Run any app:
+Run an app:
 
 ```bash
 npm run dev:london
-npm run dev:paris
-npm run dev:berlin
-npm run dev:dublin
-npm run dev:edinburgh
 ```
 
-Build any app:
+Build an app:
 
 ```bash
 npm run build:london
-npm run build:paris
-npm run build:berlin
-npm run build:dublin
-npm run build:edinburgh
 ```
 
-## Shared UI Development
+Build every app:
+
+```bash
+npm run build:all
+```
+
+## Shared UI
 
 All apps consume the local `ark-ui` package directly:
 
-- `"@bazel-digital/ark-ui": "file:../../packages/ark-ui"`
+```json
+"@bazel-digital/ark-ui": "file:../../packages/ark-ui"
+```
 
-When you update `packages/ark-ui`, those changes are immediately available to every app in this monorepo workflow.
+When `packages/ark-ui` changes, those updates are immediately available to
+every app in the monorepo workflow.
 
-## PhotoGallery Dropbox Relay
+## Documentation
+
+- [Dropbox PhotoGallery Relay](docs/dropbox-photogallery-relay.md)
 
 The London app uses a server-side Dropbox relay for PhotoGallery folder URLs.
+In the editor, set the folder URL and click `Load Images` once to persist
+resolved image and thumbnail URLs into block props.
 
-In the editor, set the folder URL and click `Load Images` once to persist resolved image and thumbnail URLs into block props.
+## Deployment
 
-Setup and credential details:
+Use one Vercel project per app, all connected to this repository.
 
-- [Dropbox PhotoGallery Relay docs](/Users/aaronbaw/Code/Ark Sites/docs/dropbox-photogallery-relay.md)
+Set each Vercel project's root directory:
 
-## Deployment (Vercel)
+| Project | Root Directory |
+| --- | --- |
+| London | `apps/thelondonchurch` |
+| Paris | `apps/theparischurch` |
+| Berlin | `apps/theberlinchurch` |
+| Dublin | `apps/thedublinchurch` |
+| Edinburgh | `apps/theedinburghchurch` |
 
-Use one Vercel project per app, all connected to this same repository.
+Set app-specific environment variables, including React Bricks credentials, in
+each Vercel project.
 
-Set each Vercel project's **Root Directory**:
+## Maintainers
 
-- London: `apps/thelondonchurch`
-- Paris: `apps/theparischurch`
-- Berlin: `apps/theberlinchurch`
-- Dublin: `apps/thedublinchurch`
-- Edinburgh: `apps/theedinburghchurch`
-
-Set app-specific environment variables (React Bricks credentials, etc.) in each Vercel project.
-
-Made with 🙏, ☕️ and ❤️ by disciples.
+Made by disciples for disciples.
