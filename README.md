@@ -5,7 +5,7 @@
 <h1 align="center">Ark Sites</h1>
 
 <p align="center">
-  A shared platform for city church websites, built around one design system,
+  A shared platform for SoldOutMovement church websites, built around one design system,
   one engineering workflow, and local editorial control through React Bricks.
 </p>
 
@@ -26,8 +26,8 @@
 
 ## Overview
 
-Ark Sites is a monorepo for building and maintaining church websites across
-multiple cities. Each city has its own Next.js application, React Bricks
+Ark Sites is a monorepo for building and maintaining SoldOutMovement websites across
+multiple cities. Each church has its own Next.js application, React Bricks
 content model, environment variables, and deployment target, while shared
 presentation components live in a single local UI package.
 
@@ -44,10 +44,10 @@ Then the Lord said to Moses:
 >
 > Exodus 31:1-6
 
-Moses was given a pattern for building the tabernacle. In the same spirit,
-Ark Sites defines a pattern for building digital tabernacles on the internet:
+Moses was given a blueprint for building the tabernacle. In the same spirit,
+Ark Sites defines a blueprint for building digital tabernacles on the internet:
 a shared design language that brings excellence, polish, and consistency to
-the Sold Out Movement's web presence while giving each local church room to
+the SoldOutMovement's web presence while giving each local church room to
 shape its site around its city, culture, and ministry needs.
 
 ## Applications
