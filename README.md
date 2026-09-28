@@ -13,6 +13,7 @@
   <a href="#local-development">Local Development</a> ·
   <a href="#applications">Applications</a> ·
   <a href="#shared-ui">Shared UI</a> ·
+  <a href="#contributing">Contributing</a> ·
   <a href="#deployment">Deployment</a>
 </p>
 
@@ -178,6 +179,53 @@ Set each Vercel project's root directory:
 
 Set app-specific environment variables, including React Bricks credentials, in
 each Vercel project.
+
+## Contributing
+
+Contributions are welcome from anyone who is willing to follow the shared
+process for this repository.
+
+> But everything should be done in a fitting and orderly way.
+>
+> 1 Corinthians 14:40
+
+The best way to contribute is to review the open and active work on the
+[Issues](../../issues) page, choose an issue you would like to help with, and
+work from there. If an issue needs more context before you start, add a comment
+so the discussion stays visible to everyone.
+
+Please use this branch naming convention:
+
+```text
+[CHANGE_TYPE]/[SHORT_DESCRIPTOR]
+```
+
+`CHANGE_TYPE` should describe the kind of work, such as `feature`, `bug`,
+`docs`, or `chore`. `SHORT_DESCRIPTOR` should be brief and kebab-case.
+
+Examples:
+
+```text
+feature/photo-galleries
+bug/fix-navbar-overlap
+docs/contributing-guide
+```
+
+All changes must be merged through pull requests. Each pull request needs at
+least one approval from someone with write access before it is merged. Please
+also make sure the relevant Vercel deployments and previews are working
+properly before requesting review.
+
+Agentic coding tools are encouraged, provided contributors remain responsible
+for the final work. AI-assisted changes should follow the standards, patterns,
+and conventions already used in this codebase. Please review generated code
+carefully before opening a pull request, with particular attention to scope,
+style, accessibility, correctness, and whether the implementation fits the
+surrounding architecture.
+
+Unit tests are not included in this repository yet, but they are actively
+encouraged. If you feel comfortable adding focused tests with your pull
+request, please do. Test coverage will become a growing focus over time.
 
 ## Maintainers
 

@@ -1,0 +1,9 @@
+# *
+User-agent: *
+Allow: /
+
+# Host
+Host: https://thebirmingham.church
+
+# Sitemaps
+Sitemap: https://thebirmingham.church/sitemap.xml
