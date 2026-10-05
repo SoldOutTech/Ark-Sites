@@ -20,6 +20,8 @@ The editor lives at `/admin`.
 
 ## Content
 
-The bricks themselves are defined in `packages/ark-ui`. Editable page content lives in React Bricks. Initial pages may be copied from Dublin, then edited here into a reusable skeleton. Publishing a change here does not automatically alter any existing church app.
+The bricks themselves are defined in `packages/ark-ui`. Editable page content lives in React Bricks. The initial Dublin copy is saved as `seeds/dublin-initial-2026-10-05.json` at the repository root. It contains all 12 published Dublin pages and 85 arranged bricks, ready to import into the Template Church React Bricks app and curate into a reusable skeleton. Publishing a change here does not automatically alter any existing church app.
+
+The snapshot can be refreshed from a source React Bricks app using `scripts/react-bricks/snapshot-published.cjs` and its read-only API key. The snapshot has no credentials. Its image objects currently point to Dublin's React Bricks assets; copy those assets into the Template Church media library before using this app as a source for new churches.
 
 Before using this app as a starter source, review city names, leader profiles, service times, addresses, contact details, donation links, embedded videos, social links, SEO metadata, and images.
