@@ -13,13 +13,15 @@
     "dev:dublin": "npm run dev --workspace=apps/thedublinchurch",
     "dev:edinburgh": "npm run dev --workspace=apps/theedinburghchurch",
     "dev:birmingham": "npm run dev --workspace=apps/thebirminghamchurch",
+    "dev:template": "npm run dev --workspace=apps/thetemplatechurch",
     "build:london": "npm run build --workspace=apps/thelondonchurch",
     "build:paris": "npm run build --workspace=apps/theparischurch",
     "build:berlin": "npm run build --workspace=apps/theberlinchurch",
     "build:dublin": "npm run build --workspace=apps/thedublinchurch",
     "build:edinburgh": "npm run build --workspace=apps/theedinburghchurch",
     "build:birmingham": "npm run build --workspace=apps/thebirminghamchurch",
-    "build:all": "npm run build --workspace=apps/thelondonchurch && npm run build --workspace=apps/theparischurch && npm run build --workspace=apps/theberlinchurch && npm run build --workspace=apps/thedublinchurch && npm run build --workspace=apps/theedinburghchurch && npm run build --workspace=apps/thebirminghamchurch"
+    "build:template": "npm run build --workspace=apps/thetemplatechurch",
+    "build:all": "npm run build --workspace=apps/thelondonchurch && npm run build --workspace=apps/theparischurch && npm run build --workspace=apps/theberlinchurch && npm run build --workspace=apps/thedublinchurch && npm run build --workspace=apps/theedinburghchurch && npm run build --workspace=apps/thebirminghamchurch && npm run build --workspace=apps/thetemplatechurch"
   },
   "engines": {
     "node": ">=22"
