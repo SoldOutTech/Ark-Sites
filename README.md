@@ -60,6 +60,7 @@ shape its site around its city, culture, and ministry needs.
 | Berlin | `apps/theberlinchurch` | `npm run dev:berlin` | `npm run build:berlin` |
 | Dublin | `apps/thedublinchurch` | `npm run dev:dublin` | `npm run build:dublin` |
 | Edinburgh | `apps/theedinburghchurch` | `npm run dev:edinburgh` | `npm run build:edinburgh` |
+| Template | `apps/thetemplatechurch` | `npm run dev:template` | `npm run build:template` |
 
 ## Platform
 
@@ -83,6 +84,7 @@ apps/
   theberlinchurch/
   thedublinchurch/
   theedinburghchurch/
+  thetemplatechurch/
 packages/
   ark-ui/
 docs/
@@ -176,6 +178,7 @@ Set each Vercel project's root directory:
 | Berlin | `apps/theberlinchurch` |
 | Dublin | `apps/thedublinchurch` |
 | Edinburgh | `apps/theedinburghchurch` |
+| Template | `apps/thetemplatechurch` |
 
 Set app-specific environment variables, including React Bricks credentials, in
 each Vercel project.
