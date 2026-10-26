@@ -85,7 +85,11 @@ async function changes(token, appId, snapshot) {
 async function copyImages(token, pages) {
   const uploads = new Map()
   async function walk(value) {
-    if (Array.isArray(value)) return Promise.all(value.map(walk))
+    if (Array.isArray(value)) {
+      const result=[]
+      for (const child of value) result.push(await walk(child))
+      return result
+    }
     if (!value || typeof value !== 'object') return value
     if (typeof value.src === 'string' && value.src.startsWith('https://assets.reactbricks.com/')) {
       const source = new URL(value.src)
@@ -151,9 +155,20 @@ async function main(args=process.argv.slice(2)) {
     console.log(`Would seed ${snap.pages.length} pages into ${appId}`)
     if (!apply) return
     const pages=await copyImages(token,snap.pages.map(p=>p.page))
-    for (const page of pages) {
+    const createdIds=new Map()
+    for (let i=0;i<pages.length;i++) {
+      const page=pages[i], sourceId=snap.pages[i].id
       const payload={...page,meta:JSON.stringify(page.meta),content:JSON.stringify(page.content),customValues:JSON.stringify(page.customValues || {})}
-      await request(token,'/admin/pages','POST',payload)
+      if (!createdIds.has(sourceId)) {
+        const created=await request(token,'/admin/pages','POST',payload)
+        if (!created?.id) throw new Error(`Page ${page.name} was created but the response did not contain its ID; inspect the target before retrying`)
+        createdIds.set(sourceId,created.id)
+      } else {
+        const id=encodeURIComponent(createdIds.get(sourceId)), language=encodeURIComponent(page.language)
+        await request(token,`/admin/pages/${id}/translations`,'POST',{language:page.language})
+        delete payload.language
+        await request(token,`/admin/pages/${id}/translations/${language}`,'PATCH',payload)
+      }
       console.log(`Created ${page.name} (${page.slug})`)
     }
     return

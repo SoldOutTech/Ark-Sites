@@ -47,3 +47,22 @@ test('seed checks the target and copies master and crop IDs into the new page',a
   assert.equal(image.hashId,'master-new');assert.match(image.src,/app-new\/images\/original\/crop-new\.webp$/)
   await fs.rm(dir,{recursive:true,force:true})
 })
+test('reused images are uploaded once',async()=>{
+  const calls=server('target')
+  const image=page.content[0].props.image
+  const copied=await cli.copyImages('test',[{content:[image,image]}])
+  assert.equal(calls.filter(c=>c.url.includes('create_from_url')).length,1)
+  assert.equal(copied[0].content[1].hashId,'master-new')
+})
+test('seed creates translations under their new page',async()=>{
+  const dir=await fs.mkdtemp(path.join(os.tmpdir(),'rb-test-')),file=path.join(dir,'content.json')
+  const en={id:'p1',language:'en',base:cli.baseline(page),original:cli.pick(page),page:cli.pick(page)}
+  const frPage={...cli.pick(page),language:'fr',slug:'/fr'}
+  const fr={id:'p1',language:'fr',base:'unused',original:frPage,page:frPage}
+  await fs.writeFile(file,JSON.stringify({format:'ark-react-bricks-snapshot-v2',appId:'source',pages:[en,fr]}))
+  process.env.REACT_BRICKS_ADMIN_TOKEN='test';const calls=server('target')
+  await cli.main(['seed',file,'--app-id','target','--apply'])
+  assert(calls.some(c=>c.url.endsWith('/admin/pages/created/translations') && c.body.language==='fr'))
+  assert(calls.some(c=>c.url.endsWith('/admin/pages/created/translations/fr') && c.method==='PATCH'))
+  await fs.rm(dir,{recursive:true,force:true})
+})
