@@ -22,7 +22,7 @@ The editor lives at `/admin`.
 
 The bricks themselves are defined in `packages/ark-ui`. Editable page content lives in React Bricks. The initial Dublin copy is saved as `seeds/dublin-initial-2026-10-05.json` at the repository root. It contains all 12 published Dublin pages and 85 arranged bricks, ready to import into the Template Church React Bricks app and curate into a reusable skeleton. Publishing a change here does not automatically alter any existing church app.
 
-The content CLI exports editable snapshots, previews and applies page changes, and seeds empty React Bricks apps. It uses the authenticated account from `create-reactbricks-app` when you choose “keep me logged in”. Alternatively, provide a short-lived `REACT_BRICKS_DASHBOARD_TOKEN` or an app-specific `REACT_BRICKS_ADMIN_TOKEN` in the environment. The token must have admin access to the app specified by `--app-id`; the app's public read API key cannot write content.
+The content CLI exports editable snapshots, previews and applies page changes, and seeds empty React Bricks apps. When run in a terminal it asks for your React Bricks email and password, plus a two-factor code if required. The password is not echoed and the session is held in memory for that command only. It does not require the React Bricks CLI. For non-interactive use, provide a short-lived `REACT_BRICKS_DASHBOARD_TOKEN` or an app-specific `REACT_BRICKS_ADMIN_TOKEN` in the environment. The account or token must have admin access to the app specified by `--app-id`; the app's public read API key cannot write content.
 
 ```sh
 # Export an editable snapshot from the template or another source app.

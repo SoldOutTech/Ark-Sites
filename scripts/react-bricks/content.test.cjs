@@ -72,3 +72,22 @@ test('rejects a token for a different app before writing',async()=>{
   await assert.rejects(cli.main(['snapshot','/unused','--app-id','target']),/does not match/)
   assert.equal(calls.filter(c=>c.method!=='GET').length,0)
 })
+test('sign-in handles two-factor authentication without saving credentials',async()=>{
+  const sent=[]
+  global.fetch=async (url,options)=>{
+    sent.push(JSON.parse(options.body))
+    return sent.length===1
+      ? {ok:false,status:401,json:async()=>({message:'OTP is required'})}
+      : {ok:true,status:200,json:async()=>({authToken:'temporary-session'})}
+  }
+  const answers=['editor@example.test','secret','123456'], prompts=[]
+  const token=await cli.signIn(async (message,secret)=>{prompts.push({message,secret});return answers.shift()})
+  assert.equal(token,'temporary-session')
+  assert.equal(prompts[1].secret,true)
+  assert.equal(sent[1].otp,'123456')
+})
+test('sign-in rejects invalid credentials',async()=>{
+  global.fetch=async ()=>({ok:false,status:401,json:async()=>({message:'invalid credentials'})})
+  const answers=['editor@example.test','wrong']
+  await assert.rejects(cli.signIn(async()=>answers.shift()),/sign-in failed/)
+})

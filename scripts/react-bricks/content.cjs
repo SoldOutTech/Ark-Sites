@@ -2,6 +2,8 @@
 const fs = require('node:fs/promises')
 const crypto = require('node:crypto')
 const path = require('node:path')
+const readline = require('node:readline/promises')
+const { Writable } = require('node:stream')
 
 const BASE = 'https://api.reactbricks.com/v2'
 const FORMAT = 'ark-react-bricks-snapshot-v2'
@@ -36,7 +38,7 @@ async function getPage(token, id, language) {
   return request(token, `/admin/pages/${encodeURIComponent(id)}/translations/${encodeURIComponent(language)}`)
 }
 function baseline(p) { return digest({page:pick(p), workingContent:p.workingContent ?? null, editStatus:p.editStatus ?? null, updatedAt:p.updatedAt ?? null}) }
-function usage() { throw new Error('Usage: content.cjs snapshot <file> --app-id <id> | diff <file> --app-id <id> | publish <file> --app-id <id> --apply | seed <file> --app-id <id> [--apply]. Set REACT_BRICKS_ADMIN_TOKEN for the target app.') }
+function usage() { throw new Error('Usage: content.cjs snapshot <file> --app-id <id> | diff <file> --app-id <id> | publish <file> --app-id <id> --apply | seed <file> --app-id <id> [--apply].') }
 function parse(args) {
   const [command, file, ...opts] = args
   if (!['snapshot','diff','publish','seed'].includes(command) || !file) usage()
@@ -127,24 +129,50 @@ async function copyImages(token, pages) {
   for (const page of pages) result.push({...page,content:await walk(page.content)})
   return result
 }
+async function signIn(prompt) {
+  const email=await prompt('React Bricks email: ',false)
+  const password=await prompt('React Bricks password: ',true)
+  if (!email || !password) throw new Error('Email and password are required')
+  async function authenticate(otp) {
+    const response=await fetch(`${BASE}/account/session`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({email,password,...(otp ? {otp} : {})})})
+    const data=await response.json().catch(()=>({}))
+    if (response.status === 401 && data.message === 'OTP is required' && !otp) return null
+    if (!response.ok || !data.authToken) throw new Error(`React Bricks sign-in failed (HTTP ${response.status})`)
+    return data.authToken
+  }
+  let token=await authenticate()
+  if (!token) {
+    const otp=await prompt('Two-factor authentication code: ',false)
+    if (!/^\d{6}$/.test(otp)) throw new Error('Enter a six-digit authentication code')
+    token=await authenticate(otp)
+  }
+  return token
+}
+async function interactiveSignIn() {
+  if (!process.stdin.isTTY || !process.stdout.isTTY) throw new Error('Interactive sign-in needs a terminal; for automation set REACT_BRICKS_DASHBOARD_TOKEN or REACT_BRICKS_ADMIN_TOKEN')
+  let muted=false
+  const output=new Writable({write(chunk,encoding,callback){if (!muted) process.stdout.write(chunk,encoding); callback()}})
+  const rl=readline.createInterface({input:process.stdin,output,terminal:true})
+  try {
+    return await signIn(async (message,secret)=>{
+      if (!secret) return (await rl.question(message)).trim()
+      process.stdout.write(message)
+      muted=true
+      try { return await rl.question('') }
+      finally { muted=false; process.stdout.write('\n') }
+    })
+  } finally { rl.close() }
+}
 async function main(args=process.argv.slice(2)) {
   const {command,file,appId,apply}=parse(args)
   let token=process.env.REACT_BRICKS_ADMIN_TOKEN
   let dashboardToken=process.env.REACT_BRICKS_DASHBOARD_TOKEN
-  if (!token && !dashboardToken) {
-    const Configstore=require('configstore')
-    const {decryptText,getMacAddress}=require('create-reactbricks-app/lib/helpers/utils')
-    const config=new Configstore('create-reactbricks-app')
-    if (config.get('isLoggedIn') && config.get('expiresAt') > Date.now() && config.get('authToken')) {
-      try { dashboardToken=decryptText(config.get('authToken'),`${getMacAddress()}-RBs`) }
-      catch { throw new Error('Cannot read the React Bricks CLI login; sign in again') }
-    }
-  }
+  if (!token && !dashboardToken) dashboardToken=await interactiveSignIn()
   if (!token && dashboardToken) {
     const result=await request(dashboardToken,'/admin/session/get_admin_token','POST',{appId,appEnv:'main'})
     token=result?.authToken
   }
-  if (!token) throw new Error('Sign in with the React Bricks CLI and select keep logged in, or set REACT_BRICKS_ADMIN_TOKEN or REACT_BRICKS_DASHBOARD_TOKEN')
+  if (!token) throw new Error('Could not obtain an admin session for this app')
   const user = await session(token,appId)
   if (command === 'snapshot') return snapshotCommand(token,appId,file)
   if (command === 'seed') {
@@ -191,4 +219,4 @@ async function main(args=process.argv.slice(2)) {
   }
 }
 if (require.main === module) main().catch(e=>{console.error(e.message);process.exitCode=1})
-module.exports={pick,baseline,digest,parse,changes,copyImages,showDiff,main}
+module.exports={pick,baseline,digest,parse,changes,copyImages,showDiff,signIn,main}
