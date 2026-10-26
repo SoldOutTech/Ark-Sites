@@ -1,0 +1,15 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 900 1200" preserveAspectRatio="xMidYMid slice">
+  <defs>
+    <linearGradient id="background" x2="1" y2="1">
+      <stop stop-color="#17233c"/>
+      <stop offset="1" stop-color="#2e4265"/>
+    </linearGradient>
+  </defs>
+  <path fill="url(#background)" d="M0 0h900v1200H0z"/>
+  <circle cx="720" cy="245" r="330" fill="#d7c6a5" opacity=".06"/>
+  <circle cx="60" cy="1040" r="420" fill="#d7c6a5" opacity=".05"/>
+  <path d="M450 290v440M315 425h270" stroke="#d7c6a5" stroke-width="18" stroke-linecap="round"/>
+  <path d="M205 780V535l245-180 245 180v245" fill="none" stroke="#d7c6a5" stroke-width="12" stroke-linejoin="round"/>
+  <text x="450" y="900" fill="#f5f1e9" text-anchor="middle" font-family="Arial, sans-serif" font-size="38" letter-spacing="7">THE TEMPLATE CHURCH</text>
+  <text x="450" y="952" fill="#d7c6a5" text-anchor="middle" font-family="Arial, sans-serif" font-size="20" letter-spacing="4">A STARTING POINT FOR EVERY CITY</text>
+</svg>
