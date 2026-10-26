@@ -66,3 +66,9 @@ test('seed creates translations under their new page',async()=>{
   assert(calls.some(c=>c.url.endsWith('/admin/pages/created/translations/fr') && c.method==='PATCH'))
   await fs.rm(dir,{recursive:true,force:true})
 })
+test('rejects a token for a different app before writing',async()=>{
+  process.env.REACT_BRICKS_ADMIN_TOKEN='test'
+  const calls=server('different-app')
+  await assert.rejects(cli.main(['snapshot','/unused','--app-id','target']),/does not match/)
+  assert.equal(calls.filter(c=>c.method!=='GET').length,0)
+})
