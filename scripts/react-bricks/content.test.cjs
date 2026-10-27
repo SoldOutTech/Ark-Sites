@@ -16,7 +16,7 @@ function server(appId, existing=[]) {
     if(url.includes('/admin/session?')) result={user:{appId,useWorkingCopy:false}}
     else if(url.endsWith('/admin/pages') && method==='GET') result=existing
     else if(url.includes('/admin/pages/p1/translations/en') && method==='GET') result=page
-    else if(url.endsWith('/admin/media/images/create_from_url')) result={appHashId:'app-new',hashId:'master-new',croppedImage:{hashId:'crop-new'}}
+    else if(url.endsWith('/admin/media/images/create_from_url')) result={appHashId:'app-new',hashId:'master-new',croppedImage:{hashId:'crop-new',imageUrl:'https://assets.reactbricks.com/app-new/images/original/crop-new.webp',type:'image/webp',width:100,height:50,srcSet:'https://assets.reactbricks.com/app-new/images/src_set/crop-new-400.webp 400w'}}
     else result={id:'created'}
     return {ok:true,status:200,json:async()=>result}
   }
@@ -45,6 +45,7 @@ test('seed checks the target and copies master and crop IDs into the new page',a
   const upload=calls.find(c=>c.url.includes('create_from_url'));assert.match(upload.body.url,/images\/master\/master-old\.jpg$/)
   const created=calls.find(c=>c.url.endsWith('/admin/pages')&&c.method==='POST');const image=JSON.parse(created.body.content)[0].props.image
   assert.equal(image.hashId,'master-new');assert.match(image.src,/app-new\/images\/original\/crop-new\.webp$/)
+  assert.match(image.srcSet,/crop-new-400\.webp/);assert.equal(image.fallbackSrc,undefined)
   await fs.rm(dir,{recursive:true,force:true})
 })
 test('reused images are uploaded once',async()=>{
@@ -90,4 +91,12 @@ test('sign-in rejects invalid credentials',async()=>{
   global.fetch=async ()=>({ok:false,status:401,json:async()=>({message:'invalid credentials'})})
   const answers=['editor@example.test','wrong']
   await assert.rejects(cli.signIn(async()=>answers.shift()),/sign-in failed/)
+})
+test('Keychain keeps the token out of command arguments and handles missing sessions',()=>{
+  let call
+  cli.keychain('write','sample.token',(...args)=>{call=args;return {status:0,stderr:''}},'darwin')
+  assert(!JSON.stringify(call[1]).includes('sample.token'))
+  assert(call[2].input.includes('sample.token'))
+  assert.equal(cli.keychain('read',undefined,()=>({status:44,stderr:'The specified item could not be found in the keychain.'}),'darwin'),null)
+  assert.throws(()=>cli.keychain('write','bad\ntoken',()=>{},'darwin'),/token format/)
 })
