@@ -4,9 +4,25 @@ const crypto = require('node:crypto')
 const path = require('node:path')
 const readline = require('node:readline/promises')
 const { Writable } = require('node:stream')
+const { spawnSync } = require('node:child_process')
 
 const BASE = 'https://api.reactbricks.com/v2'
 const FORMAT = 'ark-react-bricks-snapshot-v2'
+const KEYCHAIN_SERVICE = 'ark-sites-react-bricks-session'
+const KEYCHAIN_ACCOUNT = 'dashboard'
+function keychain(action, token, run = spawnSync, platform = process.platform) {
+  if (platform !== 'darwin') throw new Error('Keychain sessions require macOS; use an environment token on other systems')
+  if (action === 'write' && !/^[A-Za-z0-9._-]+$/.test(token)) throw new Error('Unexpected session token format; session was not saved')
+  const args = action === 'read' ? ['find-generic-password','-s',KEYCHAIN_SERVICE,'-a',KEYCHAIN_ACCOUNT,'-w'] : action === 'delete' ? ['delete-generic-password','-s',KEYCHAIN_SERVICE,'-a',KEYCHAIN_ACCOUNT] : ['-i']
+  const input = action === 'write' ? `add-generic-password -U -s ${KEYCHAIN_SERVICE} -a ${KEYCHAIN_ACCOUNT} -w "${token.replace(/([\\"])/g,'\\$1')}"\n` : undefined
+  const result = run('/usr/bin/security', args, {input, encoding:'utf8'})
+  if (result.error) throw new Error(`Keychain unavailable: ${result.error.message}`)
+  if (result.status !== 0 || (action === 'write' && /SecKeychain|error:/i.test(result.stderr))) {
+    if (action === 'read' && /could not be found/i.test(result.stderr)) return null
+    throw new Error(`Keychain ${action} failed: ${result.stderr.trim() || 'unknown error'}`)
+  }
+  return action === 'read' ? result.stdout.trim() : undefined
+}
 const fields = ['type', 'name', 'slug', 'language', 'meta', 'content', 'customValues', 'tags', 'category', 'status', 'isLocked', 'publishedAt', 'scheduledForPublishingOn']
 const pick = (p) => Object.fromEntries(fields.filter(k => p[k] !== undefined).map(k => [k, p[k]]))
 const stable = (v) => Array.isArray(v) ? v.map(stable) : v && typeof v === 'object' ? Object.fromEntries(Object.keys(v).sort().map(k => [k, stable(v[k])])) : v
@@ -112,14 +128,18 @@ async function copyImages(token, pages) {
           url:masterUrl, name:value.seoName || master, title:value.alt || '', alt:value.alt || '', source:'Upload',
           editParams:JSON.stringify({crop:value.crop,transform:value.transform})
         })
-        if (!created?.appHashId || !created.hashId || !created.croppedImage?.hashId) throw new Error('Unexpected image upload response')
+        if (!created?.hashId || !created.croppedImage?.imageUrl || !created.croppedImage?.type || (created.croppedImage.type !== 'image/svg+xml' && !created.croppedImage.srcSet)) throw new Error('Image upload did not return usable responsive image data')
         uploads.set(key,created)
         console.log(`Copied image ${uploads.size}: ${value.seoName || master}`)
       }
       const created=uploads.get(key)
-      let encoded=JSON.stringify(value)
-      for (const [from,to] of [[sourceApp,created.appHashId],[master,created.hashId],[cropped,created.croppedImage.hashId]]) encoded=encoded.replaceAll(from,to)
-      return JSON.parse(encoded)
+      const image=created.croppedImage
+      const result={...value,hashId:created.hashId,src:image.imageUrl,type:image.type,width:image.width,height:image.height}
+      for (const [target,source] of [['srcSet','srcSet'],['placeholderSrc','placeholderUrl'],['fallbackSrc','fallbackImageUrl'],['fallbackSrcSet','fallbackSrcSet'],['fallbackType','fallbackType']]) {
+        if (image[source]) result[target]=image[source]
+        else delete result[target]
+      }
+      return result
     }
     const out={}
     for (const [k,v] of Object.entries(value)) out[k]=await walk(v)
@@ -164,9 +184,22 @@ async function interactiveSignIn() {
   } finally { rl.close() }
 }
 async function main(args=process.argv.slice(2)) {
+  if (args.length === 1 && args[0] === 'login') {
+    const token = await interactiveSignIn()
+    keychain('write',token)
+    if (keychain('read') !== token) throw new Error('Could not verify the saved Keychain session')
+    console.log('React Bricks session saved in macOS Keychain')
+    return
+  }
+  if (args.length === 1 && args[0] === 'logout') {
+    keychain('delete')
+    console.log('React Bricks session removed from macOS Keychain')
+    return
+  }
   const {command,file,appId,apply}=parse(args)
   let token=process.env.REACT_BRICKS_ADMIN_TOKEN
   let dashboardToken=process.env.REACT_BRICKS_DASHBOARD_TOKEN
+  if (!token && !dashboardToken && process.platform === 'darwin') dashboardToken=keychain('read')
   if (!token && !dashboardToken) dashboardToken=await interactiveSignIn()
   if (!token && dashboardToken) {
     const result=await request(dashboardToken,'/admin/session/get_admin_token','POST',{appId,appEnv:'main'})
@@ -219,4 +252,4 @@ async function main(args=process.argv.slice(2)) {
   }
 }
 if (require.main === module) main().catch(e=>{console.error(e.message);process.exitCode=1})
-module.exports={pick,baseline,digest,parse,changes,copyImages,showDiff,signIn,main}
+module.exports={pick,baseline,digest,parse,changes,copyImages,showDiff,signIn,keychain,main}
