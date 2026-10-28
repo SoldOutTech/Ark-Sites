@@ -11,7 +11,7 @@ const MyApp = (props: AppProps) => {
     <>
       <Head>
         <meta name="robots" content="noindex, nofollow" />
-        <link rel="icon" href="/lisbon-logo.jpg" type="image/jpeg" />
+        <link rel="icon" href="/lisbon-logo.svg" type="image/svg+xml" />
       </Head>
       <ThemeProvider
         attribute="class"
