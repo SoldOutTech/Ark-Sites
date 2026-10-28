@@ -1,6 +1,7 @@
 import { ThemeProvider } from 'next-themes'
 import type { AppProps } from 'next/app'
 import Head from 'next/head'
+import { Analytics } from '@vercel/analytics/next'
 
 import ReactBricksApp from '../components/ReactBricksApp'
 
@@ -24,6 +25,7 @@ const MyApp = (props: AppProps) => {
       >
         <ReactBricksApp {...props} />
       </ThemeProvider>
+      <Analytics />
     </>
   )
 }
