@@ -60,6 +60,7 @@ shape its site around its city, culture, and ministry needs.
 | Berlin | `apps/theberlinchurch` | `npm run dev:berlin` | `npm run build:berlin` |
 | Dublin | `apps/thedublinchurch` | `npm run dev:dublin` | `npm run build:dublin` |
 | Edinburgh | `apps/theedinburghchurch` | `npm run dev:edinburgh` | `npm run build:edinburgh` |
+| Amsterdam | `apps/theamsterdamchurch` | `npm run dev:amsterdam` | `npm run build:amsterdam` |
 | Lisbon | `apps/thelisbonchurch` | `npm run dev:lisbon` | `npm run build:lisbon` |
 | Template | `apps/thetemplatechurch` | `npm run dev:template` | `npm run build:template` |
 
@@ -85,6 +86,7 @@ apps/
   theberlinchurch/
   thedublinchurch/
   theedinburghchurch/
+  theamsterdamchurch/
   thetemplatechurch/
 packages/
   ark-ui/
@@ -179,6 +181,7 @@ Set each Vercel project's root directory:
 | Berlin | `apps/theberlinchurch` |
 | Dublin | `apps/thedublinchurch` |
 | Edinburgh | `apps/theedinburghchurch` |
+| Amsterdam | `apps/theamsterdamchurch` |
 | Lisbon | `apps/thelisbonchurch` |
 | Template | `apps/thetemplatechurch` |
 
@@ -231,6 +234,10 @@ surrounding architecture.
 Unit tests are not included in this repository yet, but they are actively
 encouraged. If you feel comfortable adding focused tests with your pull
 request, please do. Test coverage will become a growing focus over time.
+
+## Amsterdam setup
+
+The Dutch Amsterdam site uses Vercel project `the-amsterdam-church` and its own React Bricks app. See [Amsterdam setup and source notes](apps/theamsterdamchurch/README.md).
 
 ## Maintainers
 
