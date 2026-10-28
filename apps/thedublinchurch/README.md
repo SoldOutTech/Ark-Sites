@@ -32,8 +32,8 @@ Create `apps/thedublinchurch/.env.local` with your React Bricks credentials:
 You can obtain these credentials from the React Bricks dashboard for the relevant project.
 
 ```bash
-NEXT_PUBLIC_REACT_BRICKS_APP_ID=...
-REACT_BRICKS_API_KEY=...
+NEXT_PUBLIC_APP_ID=...
+API_KEY=...
 ```
 
 ## Build
@@ -57,4 +57,4 @@ Create a dedicated Vercel project for this app:
 - Repo: `Ark Sites` monorepo
 - Root Directory: `apps/thedublinchurch`
 - Framework Preset: Next.js
-- Env vars: set Dublin-specific `NEXT_PUBLIC_REACT_BRICKS_APP_ID` and `REACT_BRICKS_API_KEY`
+- Env vars: set Dublin-specific `NEXT_PUBLIC_APP_ID` and `API_KEY`

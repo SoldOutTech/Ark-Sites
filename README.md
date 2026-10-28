@@ -131,6 +131,18 @@ Install dependencies once from the monorepo root:
 npm install
 ```
 
+Before running an app, create `.env.local` in that app's directory, such as
+`apps/thelondonchurch/.env.local`, with its own React Bricks credentials:
+
+```dotenv
+NEXT_PUBLIC_APP_ID=...
+API_KEY=...
+```
+
+Obtain both values from the corresponding React Bricks app dashboard. These
+variable names are the same for every church; the values are app-specific.
+Keep `.env.local` out of Git.
+
 Run an app:
 
 ```bash
@@ -185,8 +197,8 @@ Set each Vercel project's root directory:
 | Lisbon | `apps/thelisbonchurch` |
 | Template | `apps/thetemplatechurch` |
 
-Set app-specific environment variables, including React Bricks credentials, in
-each Vercel project.
+Set `NEXT_PUBLIC_APP_ID` and `API_KEY` in each Vercel project using that
+church’s own React Bricks credentials.
 
 ## Contributing
 
@@ -234,10 +246,6 @@ surrounding architecture.
 Unit tests are not included in this repository yet, but they are actively
 encouraged. If you feel comfortable adding focused tests with your pull
 request, please do. Test coverage will become a growing focus over time.
-
-## Amsterdam setup
-
-The Dutch Amsterdam site uses Vercel project `the-amsterdam-church` and its own React Bricks app. See [Amsterdam setup and source notes](apps/theamsterdamchurch/README.md).
 
 ## Maintainers
 
