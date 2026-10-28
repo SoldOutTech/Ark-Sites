@@ -21,9 +21,11 @@
     "build:edinburgh": "npm run build --workspace=apps/theedinburghchurch",
     "build:birmingham": "npm run build --workspace=apps/thebirminghamchurch",
     "build:template": "npm run build --workspace=apps/thetemplatechurch",
-    "build:all": "npm run build --workspace=apps/thelondonchurch && npm run build --workspace=apps/theparischurch && npm run build --workspace=apps/theberlinchurch && npm run build --workspace=apps/thedublinchurch && npm run build --workspace=apps/theedinburghchurch && npm run build --workspace=apps/thebirminghamchurch && npm run build --workspace=apps/thetemplatechurch",
+    "build:all": "npm run build --workspace=apps/thelondonchurch && npm run build --workspace=apps/theparischurch && npm run build --workspace=apps/theberlinchurch && npm run build --workspace=apps/thedublinchurch && npm run build --workspace=apps/theedinburghchurch && npm run build --workspace=apps/thebirminghamchurch && npm run build --workspace=apps/thetemplatechurch && npm run build:lisbon",
     "content": "node scripts/react-bricks/content.cjs",
-    "test:content": "node --test scripts/react-bricks/content.test.cjs"
+    "test:content": "node --test scripts/react-bricks/content.test.cjs",
+    "dev:lisbon": "npm run dev --workspace=apps/thelisbonchurch",
+    "build:lisbon": "npm run build --workspace=apps/thelisbonchurch"
   },
   "engines": {
     "node": ">=22"
