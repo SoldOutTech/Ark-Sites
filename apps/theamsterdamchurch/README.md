@@ -11,7 +11,7 @@ Copy `.env.example` to `.env.local` and supply this app's own `NEXT_PUBLIC_APP_I
 
 ## Content and sources
 
-The initial Dutch content is in `seeds/amsterdam-nl-2026-10-28.json`. It adapts a fresh snapshot of the nine published Template Church pages and adds a contact page. The original template records are retained for provenance. Never use this adapted seed to publish back into the Template Church app.
+Dutch page content is managed in the church’s own React Bricks app. Local content exports are excluded from Git.
 
 Amsterdam facts and assets were checked on 28 October 2026:
 
