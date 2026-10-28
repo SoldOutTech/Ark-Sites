@@ -53,3 +53,17 @@
     height: var(--video-height);
     transform: translate(-50%, -50%);
 }
+
+/* Circular branding for the site and React Bricks login screen. */
+img[src*="lisbon-logo"] {
+    border-radius: 50%;
+    aspect-ratio: 1;
+    object-fit: cover;
+    object-position: center;
+}
+
+nav img[src*="lisbon-logo"] {
+    width: 44px;
+    min-width: 44px;
+    height: 44px;
+}

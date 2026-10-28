@@ -11,12 +11,12 @@ const config: types.ReactBricksConfig = {
   bricks,
   pageTypes,
   customFields: [],
-  logo: '/lisbon-logo.jpg',
+  logo: '/lisbon-logo.svg',
   loginUI: {
-    logo: '/lisbon-logo.jpg',
+    logo: '/lisbon-logo.svg',
     logoWidth: 48,
     logoHeight: 48,
-    sideImage: '/template-cover.svg',
+    sideImage: '/lisbon-admin.jpg',
     welcomeText: 'Igreja de Lisboa Admin',
     welcomeTextStyle: {
       fontWeight: 'medium',
