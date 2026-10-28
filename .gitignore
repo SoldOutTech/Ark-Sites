@@ -27,3 +27,7 @@ pnpm-debug.log*
 
 # vercel
 .vercel/
+
+# local CMS content exports
+/seeds/
+/*-snapshot.json
