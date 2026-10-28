@@ -4,7 +4,7 @@ Dutch Ark Sites website for the Amsterdam International Christian Church. Based 
 
 - React Bricks app: `ab6a1490-46af-4acc-868c-a34860a4b56c`, main environment, Dutch (`nl`).
 - Vercel project: `the-amsterdam-church`, root `apps/theamsterdamchurch`, Node.js 22.
-- Website: https://the-amsterdam-church.vercel.app
+- Website: https://the-amsterdam-church-ews-techs-projects.vercel.app
 - Editor: `/admin`.
 
 Copy `.env.example` to `.env.local` and supply this app's own `NEXT_PUBLIC_APP_ID` and `API_KEY`. Run `npm run dev:amsterdam` or `npm run build:amsterdam` from the repository root.
