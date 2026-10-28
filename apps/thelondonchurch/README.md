@@ -32,8 +32,8 @@ Create `apps/thelondonchurch/.env.local` with your React Bricks credentials:
 You can obtain these credentials from the React Bricks dashboard for the relevant project.
 
 ```bash
-NEXT_PUBLIC_REACT_BRICKS_APP_ID=...
-REACT_BRICKS_API_KEY=...
+NEXT_PUBLIC_APP_ID=...
+API_KEY=...
 ```
 
 ### PhotoGallery Dropbox relay
@@ -80,4 +80,4 @@ Create a dedicated Vercel project for this app:
 - Repo: `Ark Sites` monorepo
 - Root Directory: `apps/thelondonchurch`
 - Framework Preset: Next.js
-- Env vars: set London-specific `NEXT_PUBLIC_REACT_BRICKS_APP_ID` and `REACT_BRICKS_API_KEY`
+- Env vars: set London-specific `NEXT_PUBLIC_APP_ID` and `API_KEY`
